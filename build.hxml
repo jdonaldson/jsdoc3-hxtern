@@ -1,0 +1,4 @@
+-cp src
+-main Publish
+-js template/publish.js
+-cmd jsdoc -t template ~/Projects/closure-compiler/contrib/externs/chrome_extensions.js
