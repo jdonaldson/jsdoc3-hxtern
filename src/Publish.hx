@@ -1,18 +1,19 @@
 /**
   The main template plugin file
  **/
-import Taffy;
+import Exports;
 import Fs;
+import Taffy;
+
 using Taffy.TaffyHelper;
 using Doclet.DocletHelper;
-using Publish.ParseHelper;
 
 class Publish {
     static function main() {
         var cnt = 0;
-        Exports.publish = function(taffyData: TaffyData, opts: PublishOpts, tutorial: Dynamic ){
+        Exports.publish = function(taffy: Taffy, opts: PublishOpts, tutorial: Dynamic ){
             var packages: Dynamic = {};
-            var data = taffyData;
+            var data = taffy;
             data.sort("longname, version, since");
             data.retrieve().each(function(x,y){
                 switch(x.kindType()){
@@ -72,53 +73,5 @@ class Publish {
         }
         return cur;
     }
-}
-
-
-
-
-class ParseHelper {
-    public static function isClass(arg : String) {
-        return ~/^[A-Z]/.match(arg);
-    }
-}
-
-
-@:native("exports")
-extern class Exports {
-    public static var publish : TaffyData->PublishOpts->Dynamic->Void;
-}
-
-
-/**
-  Not really used
- **/
-typedef PublishOpts = {
-    template      : String,
-    encoding      : String,
-    readme        : String,
-    mainpagetitle : String,
-}
-
-/**
-  Not really used
- **/
-@:native("env")
-extern class Env {
-     static public var conf : EnvConf;
-     static public var opts : EnvOpts; 
-}
-
-/**
-  Not really used
- **/
-typedef EnvConf = {
-    public var templates : Map<String, String>;
-}
-
-typedef EnvOpts = {
-    _ : String,
-    destination : String,
-    encoding : String
 }
 

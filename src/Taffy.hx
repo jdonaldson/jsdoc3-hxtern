@@ -1,6 +1,6 @@
 import Doclet;
 
-typedef TaffyData = {
+typedef Taffy = {
     insert   : String->Void,
     merge    : String->Void,
     TAFFY    : Bool,
@@ -10,7 +10,7 @@ typedef TaffyData = {
 }
 
 class TaffyHelper {
-    inline public static function retrieve(taffy:TaffyData) : TaffyQueryObject{
+    inline public static function retrieve(taffy:Taffy) : TaffyQueryObject{
         return untyped taffy();
     }
 }

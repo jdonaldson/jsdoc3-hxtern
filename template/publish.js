@@ -14,27 +14,13 @@ DocletHelper.__name__ = true;
 DocletHelper.kindType = function(doc) {
 	if(doc.kind == "file") return DocletType.DocletFileType(doc); else if(doc.kind == "function") return DocletType.DocletFunctionType(doc); else if(doc.kind == "member") return DocletType.DocletMemberType(doc); else if(doc.kind == "class") return DocletType.DocletClassType(doc); else if(doc.kind == "constant") return DocletType.DocletConstantType(doc); else if(doc.kind == "typedef") return DocletType.DocletTypedefType(doc); else if(doc.kind == "package") return DocletType.DocletPackageType(doc); else return DocletType.DocletUnknownType(doc);
 }
-var EReg = function(r,opt) {
-	opt = opt.split("u").join("");
-	this.r = new RegExp(r,opt);
-};
-EReg.__name__ = true;
-EReg.prototype = {
-	match: function(s) {
-		if(this.r.global) this.r.lastIndex = 0;
-		this.r.m = this.r.exec(s);
-		this.r.s = s;
-		return this.r.m != null;
-	}
-	,__class__: EReg
-}
 var Publish = function() { }
 Publish.__name__ = true;
 Publish.main = function() {
 	var cnt = 0;
-	exports.publish = function(taffyData,opts,tutorial) {
+	exports.publish = function(taffy,opts,tutorial) {
 		var packages = { };
-		var data = taffyData;
+		var data = taffy;
 		data.sort("longname, version, since");
 		data().each(function(x,y) {
 			var _g = DocletHelper.kindType(x);
@@ -102,11 +88,6 @@ Publish.extractPackages = function(pack,packages) {
 		}
 	}
 	return cur;
-}
-var ParseHelper = function() { }
-ParseHelper.__name__ = true;
-ParseHelper.isClass = function(arg) {
-	return new EReg("^[A-Z]","").match(arg);
 }
 var Reflect = function() { }
 Reflect.__name__ = true;
