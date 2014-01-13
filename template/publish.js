@@ -1,34 +1,60 @@
 (function () { "use strict";
 var $estr = function() { return js.Boot.__string_rec(this,''); };
-var DocletType = { __ename__ : true, __constructs__ : ["DocletFileType","DocletMemberType","DocletFunctionType","DocletClassType","DocletConstantType","DocletTypedefType","DocletPackageType","DocletUnknownType"] }
-DocletType.DocletFileType = function(doc) { var $x = ["DocletFileType",0,doc]; $x.__enum__ = DocletType; $x.toString = $estr; return $x; }
-DocletType.DocletMemberType = function(doc) { var $x = ["DocletMemberType",1,doc]; $x.__enum__ = DocletType; $x.toString = $estr; return $x; }
-DocletType.DocletFunctionType = function(doc) { var $x = ["DocletFunctionType",2,doc]; $x.__enum__ = DocletType; $x.toString = $estr; return $x; }
-DocletType.DocletClassType = function(doc) { var $x = ["DocletClassType",3,doc]; $x.__enum__ = DocletType; $x.toString = $estr; return $x; }
-DocletType.DocletConstantType = function(doc) { var $x = ["DocletConstantType",4,doc]; $x.__enum__ = DocletType; $x.toString = $estr; return $x; }
-DocletType.DocletTypedefType = function(doc) { var $x = ["DocletTypedefType",5,doc]; $x.__enum__ = DocletType; $x.toString = $estr; return $x; }
-DocletType.DocletPackageType = function(doc) { var $x = ["DocletPackageType",6,doc]; $x.__enum__ = DocletType; $x.toString = $estr; return $x; }
-DocletType.DocletUnknownType = function(doc) { var $x = ["DocletUnknownType",7,doc]; $x.__enum__ = DocletType; $x.toString = $estr; return $x; }
+var DocletType = { __ename__ : true, __constructs__ : ["DocletFile","DocletMember","DocletFunction","DocletClass","DocletConstant","DocletTypedef","DocletPackage","DocletUnknown"] }
+DocletType.DocletFile = function(doc) { var $x = ["DocletFile",0,doc]; $x.__enum__ = DocletType; $x.toString = $estr; return $x; }
+DocletType.DocletMember = function(doc) { var $x = ["DocletMember",1,doc]; $x.__enum__ = DocletType; $x.toString = $estr; return $x; }
+DocletType.DocletFunction = function(doc) { var $x = ["DocletFunction",2,doc]; $x.__enum__ = DocletType; $x.toString = $estr; return $x; }
+DocletType.DocletClass = function(doc) { var $x = ["DocletClass",3,doc]; $x.__enum__ = DocletType; $x.toString = $estr; return $x; }
+DocletType.DocletConstant = function(doc) { var $x = ["DocletConstant",4,doc]; $x.__enum__ = DocletType; $x.toString = $estr; return $x; }
+DocletType.DocletTypedef = function(doc) { var $x = ["DocletTypedef",5,doc]; $x.__enum__ = DocletType; $x.toString = $estr; return $x; }
+DocletType.DocletPackage = function(doc) { var $x = ["DocletPackage",6,doc]; $x.__enum__ = DocletType; $x.toString = $estr; return $x; }
+DocletType.DocletUnknown = function(doc) { var $x = ["DocletUnknown",7,doc]; $x.__enum__ = DocletType; $x.toString = $estr; return $x; }
 var DocletHelper = function() { }
 DocletHelper.__name__ = true;
-DocletHelper.kindType = function(doc) {
-	if(doc.kind == "file") return DocletType.DocletFileType(doc); else if(doc.kind == "function") return DocletType.DocletFunctionType(doc); else if(doc.kind == "member") return DocletType.DocletMemberType(doc); else if(doc.kind == "class") return DocletType.DocletClassType(doc); else if(doc.kind == "constant") return DocletType.DocletConstantType(doc); else if(doc.kind == "typedef") return DocletType.DocletTypedefType(doc); else if(doc.kind == "package") return DocletType.DocletPackageType(doc); else return DocletType.DocletUnknownType(doc);
+DocletHelper.docletType = function(doc) {
+	return (function($this) {
+		var $r;
+		switch(doc.kind) {
+		case "file":
+			$r = DocletType.DocletFile(doc);
+			break;
+		case "function":
+			$r = DocletType.DocletFunction(doc);
+			break;
+		case "member":
+			$r = DocletType.DocletMember(doc);
+			break;
+		case "class":
+			$r = DocletType.DocletClass(doc);
+			break;
+		case "constant":
+			$r = DocletType.DocletConstant(doc);
+			break;
+		case "typedef":
+			$r = DocletType.DocletTypedef(doc);
+			break;
+		case "package":
+			$r = DocletType.DocletPackage(doc);
+			break;
+		default:
+			$r = DocletType.DocletUnknown(doc);
+		}
+		return $r;
+	}(this));
 }
 var Publish = function() { }
 Publish.__name__ = true;
 Publish.main = function() {
-	var cnt = 0;
 	exports.publish = function(taffy,opts,tutorial) {
-		var packages = { };
-		var data = taffy;
-		data.sort("longname, version, since");
-		data().each(function(x,y) {
-			var _g = DocletHelper.kindType(x);
+		var pack = { };
+		taffy.sort("longname, version, since");
+		taffy().each(function(x,y) {
+			var _g = DocletHelper.docletType(x);
 			var $e = (_g);
 			switch( $e[1] ) {
 			case 2:
 				var doc = $e[2];
-				var cur = Publish.extractPackages(doc.memberof,packages);
+				var cur = Publish.extractPackages(doc.memberof,pack);
 				Reflect.setField(cur,doc.name,doc.kind);
 				break;
 			case 0:
@@ -36,22 +62,22 @@ Publish.main = function() {
 				break;
 			case 1:
 				var doc = $e[2];
-				var cur = Publish.extractPackages(doc.memberof,packages);
+				var cur = Publish.extractPackages(doc.memberof,pack);
 				Reflect.setField(cur,doc.name,doc.kind);
 				break;
 			case 3:
 				var doc = $e[2];
-				var cur = Publish.extractPackages(doc.memberof,packages);
+				var cur = Publish.extractPackages(doc.memberof,pack);
 				Reflect.setField(cur,doc.name,doc.kind);
 				break;
 			case 4:
 				var doc = $e[2];
-				var cur = Publish.extractPackages(doc.memberof,packages);
+				var cur = Publish.extractPackages(doc.memberof,pack);
 				Reflect.setField(cur,doc.name,doc.kind);
 				break;
 			case 5:
 				var doc = $e[2];
-				var cur = Publish.extractPackages(doc.memberof,packages);
+				var cur = Publish.extractPackages(doc.memberof,pack);
 				Reflect.setField(cur,doc.name,doc.kind);
 				break;
 			case 6:
@@ -61,10 +87,17 @@ Publish.main = function() {
 				throw "Unknown doclet type: " + x.kind;
 			}
 		});
-		if(!require('fs').existsSync(env.opts.destination)) {
-		}
-		console.log(require("path"));
+		var dest = env.opts.destination;
+		Publish.ensureDirectory(dest);
+		Publish.visitPackage(pack,".");
 	};
+}
+Publish.visitPackage = function(pack,cwd) {
+	var _g = 0, _g1 = Reflect.fields(pack);
+	while(_g < _g1.length) {
+		var f = _g1[_g];
+		++_g;
+	}
 }
 Publish.extractPackages = function(pack,packages) {
 	if(pack == null) pack = "";
@@ -89,6 +122,9 @@ Publish.extractPackages = function(pack,packages) {
 	}
 	return cur;
 }
+Publish.ensureDirectory = function(path) {
+	if(!require('fs').existsSync(path)) require('fs').mkdirSync(path);
+}
 var Reflect = function() { }
 Reflect.__name__ = true;
 Reflect.hasField = function(o,field) {
@@ -104,6 +140,16 @@ Reflect.field = function(o,field) {
 }
 Reflect.setField = function(o,field,value) {
 	o[field] = value;
+}
+Reflect.fields = function(o) {
+	var a = [];
+	if(o != null) {
+		var hasOwnProperty = Object.prototype.hasOwnProperty;
+		for( var f in o ) {
+		if(f != "__id__" && f != "hx__closures__" && hasOwnProperty.call(o,f)) a.push(f);
+		}
+	}
+	return a;
 }
 var TaffyHelper = function() { }
 TaffyHelper.__name__ = true;

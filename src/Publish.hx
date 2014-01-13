@@ -10,46 +10,44 @@ using Doclet.DocletHelper;
 
 class Publish {
     static function main() {
-        var cnt = 0;
         Exports.publish = function(taffy: Taffy, opts: PublishOpts, tutorial: Dynamic ){
-            var packages: Dynamic = {};
-            var data = taffy;
-            data.sort("longname, version, since");
-            data.retrieve().each(function(x,y){
-                switch(x.kindType()){
-                    case DocletFunctionType(doc) : {
-                        var cur = extractPackages(doc.memberof, packages);
+            var pack: Dynamic = {};
+            taffy.sort("longname, version, since");
+            taffy.retrieve().each(function(x,y){
+                switch(x.docletType()){
+                    case DocletFunction(doc) : {
+                        var cur = extractPackages(doc.memberof, pack);
                         Reflect.setField(cur, doc.name, doc.kind);
                     }
-                    case DocletFileType(doc)     : {
-                        // trace(x);
-                    }
-                    case DocletMemberType(doc)   : {
-                        var cur = extractPackages(doc.memberof, packages);
+                    case DocletFile(doc)     : {}
+                    case DocletMember(doc)   : {
+                        var cur = extractPackages(doc.memberof, pack);
                         Reflect.setField(cur, doc.name, doc.kind);
                     }
-                    case DocletClassType(doc)    : {
-                        var cur = extractPackages(doc.memberof, packages);
+                    case DocletClass(doc)    : {
+                        var cur = extractPackages(doc.memberof, pack);
                         Reflect.setField(cur, doc.name, doc.kind);
                     }
-                    case DocletConstantType(doc) : {
-                        var cur = extractPackages(doc.memberof, packages);
+                    case DocletConstant(doc) : {
+                        var cur = extractPackages(doc.memberof, pack);
                         Reflect.setField(cur, doc.name, doc.kind);
                     }
-                    case DocletTypedefType(doc)  : {
-                        var cur = extractPackages(doc.memberof, packages);
+                    case DocletTypedef(doc)  : {
+                        var cur = extractPackages(doc.memberof, pack);
                         Reflect.setField(cur, doc.name, doc.kind);
                     }
-                    case DocletPackageType(doc)  : {}
+                    case DocletPackage(doc)  : {}
                     case _ : throw('Unknown doclet type: ${x.kind}');
                 }
             });
+            var dest = Env.opts.destination;
+            ensureDirectory(dest);
+            visitPackage(pack, '.');
+        }
+    }
+    static function visitPackage(pack : Dynamic, cwd : String){
+        for (f in Reflect.fields(pack)){
 
-            if(!Fs.existsSync(Env.opts.destination)){
-            }
-
-            // trace(untyped require('fs'));
-            trace(untyped require('path'));
         }
     }
     static function extractPackages(pack = '', packages: Dynamic) : {} {
@@ -72,6 +70,10 @@ class Publish {
             }
         }
         return cur;
+    }
+
+    static function ensureDirectory(path : String){
+        if(!Fs.existsSync(path)) Fs.mkdirSync(path);
     }
 }
 

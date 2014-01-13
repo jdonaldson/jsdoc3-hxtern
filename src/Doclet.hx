@@ -24,8 +24,8 @@ typedef DocletFile = {
 }
 
 /**
-  Member base.  Simple fields have a type, member functions have this info 
-  in their params 
+  Member base.  Simple fields have a type, member functions have this info
+  in their params
  **/
 typedef DocletMemberBase = {
     > Doclet,
@@ -65,19 +65,19 @@ typedef DocletPackage = {
   Wrap all expected types
  **/
 enum DocletType {
-    DocletFileType     ( doc : DocletFile);
-    DocletMemberType   ( doc : DocletMember);
-    DocletFunctionType ( doc : DocletFunction);
-    DocletClassType    ( doc : DocletClass);
-    DocletConstantType ( doc : DocletConstant);
-    DocletTypedefType  ( doc : DocletTypedef);
-    DocletPackageType  ( doc : DocletPackage);
-    DocletUnknownType  ( doc : Doclet);
+    DocletFile     ( doc : DocletFile);
+    DocletMember   ( doc : DocletMember);
+    DocletFunction ( doc : DocletFunction);
+    DocletClass    ( doc : DocletClass);
+    DocletConstant ( doc : DocletConstant);
+    DocletTypedef  ( doc : DocletTypedef);
+    DocletPackage  ( doc : DocletPackage);
+    DocletUnknown  ( doc : Doclet);
 }
 
 
 /**
-  The metadata that most doclets posess.  TODO: figure out which ones have 
+  The metadata that most doclets posess.  TODO: figure out which ones have
   this *for sure*
  **/
 typedef Meta = {
@@ -94,23 +94,25 @@ typedef Meta = {
  **/
 class DocletHelper {
     /**
-      Looks a the the doclet kind and return the enum for the 
+      Looks at the the doclet kind and return the enum for the
       proper type.
      **/
-    public static function kindType(doc:Doclet) : DocletType{
-        if      ( doc.kind == 'file'     ) return DocletFileType( cast doc) ;
-        else if ( doc.kind == 'function' ) return DocletFunctionType( cast doc ) ;
-        else if ( doc.kind == 'member'   ) return DocletMemberType( cast doc) ;
-        else if ( doc.kind == 'class'    ) return DocletClassType( cast doc) ;
-        else if ( doc.kind == 'constant' ) return DocletConstantType( cast doc) ;
-        else if ( doc.kind == 'typedef'  ) return DocletTypedefType( cast doc) ;
-        else if ( doc.kind == 'package'  ) return DocletPackageType( cast doc) ;
-        else return DocletUnknownType(doc);
+    public static function docletType(doc:Doclet) : DocletType{
+        return switch(doc.kind){
+            case 'file'     : DocletFile     (cast doc);
+            case 'function' : DocletFunction (cast doc);
+            case 'member'   : DocletMember   (cast doc);
+            case 'class'    : DocletClass    (cast doc);
+            case 'constant' : DocletConstant (cast doc);
+            case 'typedef'  : DocletTypedef  (cast doc);
+            case 'package'  : DocletPackage  (cast doc);
+            default         : DocletUnknown  (doc);
+        }
     }
 }
 
 /**
-  Function params 
+  Function params
  **/
 typedef FunctionParam = {
     type          : { names : Array<String> },
