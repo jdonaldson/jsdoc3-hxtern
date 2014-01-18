@@ -6,13 +6,13 @@
   The base doclet type.  Most doclets should have this info.
  **/
 typedef Doclet = {
+    name         : Dynamic,
     comment      : String,
     ?meta        : Dynamic,
     kind         : String,
-    name         : Dynamic,
     longname     : String,
     ?see         : Array<String>,
-    ?description : String,
+    ?description : String
 }
 
 /**
@@ -29,9 +29,9 @@ typedef DocletFile = {
  **/
 typedef DocletMemberBase = {
     > Doclet,
-    memberof : String,
-    scope    : String, // static, instance, global
-    ?access  : String, // private
+    memberof   : String,
+    scope      : String, // static, instance, global
+    ?access    : String, // private
 }
 typedef DocletMember = {
     > DocletMemberBase,
@@ -65,16 +65,33 @@ typedef DocletPackage = {
   Wrap all expected types
  **/
 enum DocletType {
-    DocletFile     ( doc : DocletFile);
-    DocletMember   ( doc : DocletMember);
-    DocletFunction ( doc : DocletFunction);
-    DocletClass    ( doc : DocletClass);
-    DocletConstant ( doc : DocletConstant);
-    DocletTypedef  ( doc : DocletTypedef);
-    DocletPackage  ( doc : DocletPackage);
-    DocletUnknown  ( doc : Doclet);
+    DocletFile     (doc: DocletFile);
+    DocletMember   (doc: DocletMember);
+    DocletFunction (doc: DocletFunction);
+    DocletClass    (doc: DocletClass);
+    DocletConstant (doc: DocletConstant);
+    DocletTypedef  (doc: DocletTypedef);
+    DocletPackage  (doc: DocletPackage);
+    DocletUnknown  (doc: Doclet);
 }
 
+enum HaxeType {
+    HaxeFile     (file: String, doc: DocletFile);
+    HaxeMember   (cls: ClassType, name: String, doc: DocletMember);
+    HaxeFunction (cls: ClassType, name: String, doc: DocletFunction);
+    HaxeClass    (doc: DocletClass);
+    HaxeConstant (doc: DocletConstant);
+    HaxeTypedef  (doc: DocletTypedef);
+    HaxePackage  (doc: DocletPackage);
+    HaxeUnknown  (doc: Doclet);
+    NoOp;
+}
+
+enum ClassType {
+    Class        (pack: String, name: String);
+    VirtualClass (pack: String, name: String);
+    ChildClass   (pack: String, parent_name: String, name: String);
+}
 
 /**
   The metadata that most doclets posess.  TODO: figure out which ones have

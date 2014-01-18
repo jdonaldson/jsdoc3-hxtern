@@ -8,7 +8,8 @@ extern class Fs {
     //Directories
     public static function mkdirSync(path : String, ?permissions_opt : Dynamic) : Void {}
     //Files
-    public static function open(source : String, mode: ModeObj) : Stream;
+    public static function openSync(source : String, flags : Dynamic) : Stream;
+    public static function writeFileSync(file : String, buffer : String, ?encoding : String ) : Stream;
     //Paths
     public static function workingDirectory() : String;
 }

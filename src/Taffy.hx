@@ -20,6 +20,7 @@ extern class TaffyQueryObject {
     public function update() : TaffyQueryObject;
     public function remove(over_ride: Bool) : Int;
     public function each(f: Doclet->Int->Void) : TaffyQueryObject;
+    public function map<T>(f: Doclet->Int->T) : Array<T>;
     public function first() : TaffyQueryObject;
 
 }
