@@ -76,22 +76,44 @@ enum DocletType {
 }
 
 enum HaxeType {
-    HaxeFile     (file: String, doc: DocletFile);
-    HaxeMember   (cls: ClassType, name: String, doc: DocletMember);
-    HaxeFunction (cls: ClassType, name: String, doc: DocletFunction);
-    HaxeClass    (doc: DocletClass);
-    HaxeConstant (doc: DocletConstant);
-    HaxeTypedef  (doc: DocletTypedef);
-    HaxePackage  (doc: DocletPackage);
-    HaxeUnknown  (doc: Doclet);
+    HaxeConstructor    ( args : HaxeBase<DocletFunction>);
+    HaxeInstanceField  ( args : HaxeMember<DocletMember>);
+    HaxeStaticField    ( args : HaxeMember<DocletMember> );
+    HaxeInstanceMethod ( args : HaxeFunction<DocletFunction> );
+    HaxeStaticMethod   ( args : HaxeFunction<DocletFunction> );
     NoOp;
 }
 
-enum ClassType {
-    Class        (pack: String, name: String);
-    VirtualClass (pack: String, name: String);
-    ChildClass   (pack: String, parent_name: String, name: String);
+typedef Pack = {
+    packs : Map<String,Pack>,
+    classes : Map<String, Clazz>, 
 }
+
+typedef Clazz = {
+    pack    : Pack,
+    name    : String,
+    ?native : String,
+    ?fields : {
+        ?static_var      : Array<String>,
+        ?instance_var    : Array<String>,
+        ?static_method   : Array<String>,
+        ?instance_method : Array<String>,
+    }
+}
+
+typedef HaxeBase<DocType> = {
+    clazz : Clazz,
+    file : String,
+    doc : DocType,
+}
+
+typedef HaxeMember<DocType> = {
+    >HaxeBase<DocType>,
+    name : String
+}
+typedef HaxeFunction<DocType> = HaxeMember<DocType>;
+
+
 
 /**
   The metadata that most doclets posess.  TODO: figure out which ones have

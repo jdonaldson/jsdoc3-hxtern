@@ -11,129 +11,149 @@ using Taffy.TaffyHelper;
 using Doclet.DocletHelper;
 
 class Publish {
+    static var pack_obj : Pack;
     static function main() {
         var dest = Env.opts.destination;
-        var class_registry = new Map<String, ClassType>();
-        ensureDirectory(dest);
         Exports.publish = function(taffy: Taffy, opts: PublishOpts, tutorial: Dynamic ){
-
             taffy.sort("longname, version, since");
-            var haxe_types = taffy.retrieve().map(function(x,y){
-                var type:HaxeType = 
+            var haxetypes = taffy.retrieve().map(function(x,y){
                 switch(x.docletType()){
                     case DocletFunction(doc) : {
-                        var name = doc.name;
-                        var cls = doc.memberof;
-                        if (ClassRegistry.uc(doc.name)){
-                            // if it's uppercase, just assume it's a constructor.
-                            // we need to patch up javascript constructors for haxe format
-                            cls = doc.memberof + '.' + doc.name;
-                            name = "new";
-                        } 
-                        var cls_type = ClassRegistry.resolve(cls, name);
+                        if (uc(doc.name)){
+                            // assume constructor. Use name as class
+                            var cls_pack = doc.memberof + '.' + doc.name;
+                            var clazz = makeClazz(cls_pack);
+                            return HaxeConstructor({
+                                clazz : makeClazz(cls_pack),
+                                file  : pack2file(cls_pack),
+                                doc   : doc
+                            });
+                        } else {
+                            var clazz = makeClazz(doc.memberof);
 
-                        HaxeFunction( cls_type, name, doc);
+                            var args = {
+                                name  : doc.name,
+                                clazz : clazz,
+                                file  : pack2file(clazz.pack + '.' + doc.name),
+                                doc   : doc
+                            };
+
+                            switch(doc.scope){
+                                case "instance" : return HaxeInstanceMethod(args);
+                                case "static"   : return HaxeStaticMethod(args);
+                            }
+                        }
                     }
-                    case DocletMember(doc) : {
-                        var cls_type = ClassRegistry.resolve(doc.memberof, doc.name);
-                        HaxeMember(cls_type, doc.name, doc);
-                    }
+                    case DocletMember(doc) : {}
                     case DocletUnknown(_) : {
                         throw('Unknown doclet type: ${x.kind}');
-                        NoOp;
                     }
-                    default :  NoOp; 
+                    default : null;
                 }
-            return type;
+                return NoOp;
             });
-            for (t in haxe_types) switch(t){
-                case HaxeMember(cls, name, doc) : {
-                    ensureClassFile(cls, dest);
-                }
-                case HaxeFunction(cls, name, doc) : {
-                    ensureClassFile(cls, dest);
-                }
-                default : null;
-            }
-        }
-    }
-    public static function classSig(cls : ClassType, debug = false){
-        var arr =  switch(cls){
-            case Class (pack, name) : [pack,name];
-            case VirtualClass (pack, name) : {
-                debug ? [pack,'#$name#']: [pack,name];
-            }
-            case ChildClass (pack, parent_name, name) :  [pack, parent_name, name];
-        }
-        return arr.filter(function(x) return x != '').join('.');
-    }
+            var packs:Dynamic = {};
+            for (t in haxetypes){
+                switch(t){
+                    case HaxeConstructor(args) : {
 
-    public static function pack2file(arg: String) {
-        return arg.split('.').join(Path.sep) + '.hx';
-    }
-    public static function pack2dir(arg: String) {
-        return arg.split('.').join(Path.sep);
-    }
-
-    static function ensureClassFile(cls : ClassType, dest :String){
-       switch(cls){
-           case Class(pack, name), VirtualClass(pack, name) : {
-               ensureDirectory(dest + Path.sep + pack2dir(pack + '.' + name));
-           }
-           case ChildClass(pack, parent_name, name) : {
-               ensureDirectory(dest + Path.sep + pack2dir(pack + '.' + name));
-           }
-       }
-    }
-
-    static function ensureDirectory(path : String){
-        if(!Fs.existsSync(path)){
-            var dirs = path.split(Path.sep);
-            var current = '';
-            for (d in dirs){
-                current += d + Path.sep;
-                if(!Fs.existsSync(current)){
-                    Fs.mkdirSync(current);
+                    }
+                    default : null;
                 }
             }
+
         }
     }
-}
 
-class ClassRegistry{
-    public static var registry: Map<String, ClassType>;
-    public static function resolve(packAndClass : String, name : String) {
-        if (registry == null) registry = new Map();
-        var arg_class = hxClass(packAndClass);
-        if (registry.exists(packAndClass)){
-            var reg_class = registry.get(packAndClass);
-            var reg_type = Type.enumConstructor(reg_class);
-            var arg_type = Type.enumConstructor(arg_class);
-            if (reg_type != arg_type) throw 'field $name has a problem:  mismatch in $packAndClass between $reg_type and $arg_type';
-        } else registry.set(packAndClass, arg_class);
-        return arg_class;
+    /**
+      Split the pack string argument into an array, and iterate through them,
+      ensuring that the pack_object contains an entry for each pack.  Return
+      the last created/returned pack object.
+     **/
+    public static function extractPacks(pack : String) : Pack {
+        var packs = pack.split('.');
+        var cur_obj = pack_obj;
+        for (p in packs){
+            if (cur_obj.packs.exists(p)) cur_obj = cur_obj.packs.get(p);
+            else {
+                var new_pack = {
+                    packs   : new Map<String, Pack>(),
+                    classes : new Map<String, Clazz>()
+                };
+                cur_obj.packs.set(p, new_pack);
+                cur_obj = new_pack;
+            }
+        }
+        return cur_obj; 
     }
 
-    public static function hxClass(packAndClass : String): ClassType {
-        if (packAndClass == null) return null;
-        var packs = packAndClass.split('.');
-        var cls = packs.pop();
-        if (lc(cls)){
-            var uc_cls = titleCase(cls);
-            var fullname = packs.join('.') + '.' + uc_cls;
-            return VirtualClass(packs.join('.'), uc_cls);
-        } else if (uc(packs[packs.length-1])){
-            var parent_cls = packs.pop();
-            return ChildClass(packs.join('.'), parent_cls, cls);
-        } else if (packs.length > 2 && uc(packs[packs.length-2])){
-            throw 'Error: $cls has invalid class signature for $packAndClass: too many title case objects to convert to classes';
-        } else return Class(packs.join('.'), cls);
+    /**
+      Return the "clazz".  Check if it's lower case, if so
+      add a native field giving its native name. 
+     **/
+    public static function makeClazz(memberof : String) : Clazz {
+        var packs = memberof.split('.');
+        var cls  : String= packs.pop();
+        var pack = packs.join('.');
+        var clazz : Clazz = lc(cls) ?
+        {
+            name   : titleCase(cls),
+            pack   : extractPacks(packs.join('.')),
+            native : memberof
+        } : {
+            name : cls,
+            pack : extractPacks(memberof)
+        }
+        var cur_clazzes = clazz.pack.classes;
+        if (cur_clazzes.exists(clazz.name)){
+            var cur_clazz = cur_clazzes.get(clazz.name);
+            if (cur_clazz.native != clazz.native){
+                throw ("Two different definitions for ${clazz.name} : $clazz and $cur_clazz");
+            } 
+        } else {
+            cur_clazzes.set(clazz.name, clazz);
+        }
+        return clazz;
+
     }
     public static function lc(arg: String) return ~/^[a-z]/.match(arg);
     public static function uc(arg: String) return ~/^[A-Z]/.match(arg);
-    public static function titleCase(arg: String) {
+    public static function titleCase(arg: String) : String {
         return arg.charAt(0).toUpperCase() + arg.substring(1);
     }
+    public static function pack2file(arg: String) {
+        return arg.split('.').join(Path.sep) + '.hx';
+    }
+
 }
 
 
+
+
+    // public static function pack2dir(arg: String) {
+    //     return arg.split('.').join(Path.sep);
+    // }
+
+    // static function ensureClassFile(cls : ClassType, dest :String){
+    //    switch(cls){
+    //        case Class(pack, name), VirtualClass(pack, name) : {
+    //            ensureDirectory(dest + Path.sep + pack2dir(pack + '.' + name));
+    //        }
+    //        case ChildClass(pack, parent_name, name) : {
+    //            ensureDirectory(dest + Path.sep + pack2dir(pack + '.' + name));
+    //        }
+    //    }
+    // }
+
+    // static function ensureDirectory(path : String){
+    //     if(!Fs.existsSync(path)){
+    //         var dirs = path.split(Path.sep);
+    //         var current = '';
+    //         for (d in dirs){
+    //             current += d + Path.sep;
+    //             if(!Fs.existsSync(current)){
+    //                 Fs.mkdirSync(current);
+    //             }
+    //         }
+    //     }
+    // }

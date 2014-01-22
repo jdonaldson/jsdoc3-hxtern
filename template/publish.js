@@ -9,22 +9,15 @@ DocletType.DocletConstant = function(doc) { var $x = ["DocletConstant",4,doc]; $
 DocletType.DocletTypedef = function(doc) { var $x = ["DocletTypedef",5,doc]; $x.__enum__ = DocletType; $x.toString = $estr; return $x; }
 DocletType.DocletPackage = function(doc) { var $x = ["DocletPackage",6,doc]; $x.__enum__ = DocletType; $x.toString = $estr; return $x; }
 DocletType.DocletUnknown = function(doc) { var $x = ["DocletUnknown",7,doc]; $x.__enum__ = DocletType; $x.toString = $estr; return $x; }
-var HaxeType = { __ename__ : true, __constructs__ : ["HaxeFile","HaxeMember","HaxeFunction","HaxeClass","HaxeConstant","HaxeTypedef","HaxePackage","HaxeUnknown","NoOp"] }
-HaxeType.HaxeFile = function(file,doc) { var $x = ["HaxeFile",0,file,doc]; $x.__enum__ = HaxeType; $x.toString = $estr; return $x; }
-HaxeType.HaxeMember = function(cls,name,doc) { var $x = ["HaxeMember",1,cls,name,doc]; $x.__enum__ = HaxeType; $x.toString = $estr; return $x; }
-HaxeType.HaxeFunction = function(cls,name,doc) { var $x = ["HaxeFunction",2,cls,name,doc]; $x.__enum__ = HaxeType; $x.toString = $estr; return $x; }
-HaxeType.HaxeClass = function(doc) { var $x = ["HaxeClass",3,doc]; $x.__enum__ = HaxeType; $x.toString = $estr; return $x; }
-HaxeType.HaxeConstant = function(doc) { var $x = ["HaxeConstant",4,doc]; $x.__enum__ = HaxeType; $x.toString = $estr; return $x; }
-HaxeType.HaxeTypedef = function(doc) { var $x = ["HaxeTypedef",5,doc]; $x.__enum__ = HaxeType; $x.toString = $estr; return $x; }
-HaxeType.HaxePackage = function(doc) { var $x = ["HaxePackage",6,doc]; $x.__enum__ = HaxeType; $x.toString = $estr; return $x; }
-HaxeType.HaxeUnknown = function(doc) { var $x = ["HaxeUnknown",7,doc]; $x.__enum__ = HaxeType; $x.toString = $estr; return $x; }
-HaxeType.NoOp = ["NoOp",8];
+var HaxeType = { __ename__ : true, __constructs__ : ["HaxeConstructor","HaxeInstanceField","HaxeStaticField","HaxeInstanceMethod","HaxeStaticMethod","NoOp"] }
+HaxeType.HaxeConstructor = function(args) { var $x = ["HaxeConstructor",0,args]; $x.__enum__ = HaxeType; $x.toString = $estr; return $x; }
+HaxeType.HaxeInstanceField = function(args) { var $x = ["HaxeInstanceField",1,args]; $x.__enum__ = HaxeType; $x.toString = $estr; return $x; }
+HaxeType.HaxeStaticField = function(args) { var $x = ["HaxeStaticField",2,args]; $x.__enum__ = HaxeType; $x.toString = $estr; return $x; }
+HaxeType.HaxeInstanceMethod = function(args) { var $x = ["HaxeInstanceMethod",3,args]; $x.__enum__ = HaxeType; $x.toString = $estr; return $x; }
+HaxeType.HaxeStaticMethod = function(args) { var $x = ["HaxeStaticMethod",4,args]; $x.__enum__ = HaxeType; $x.toString = $estr; return $x; }
+HaxeType.NoOp = ["NoOp",5];
 HaxeType.NoOp.toString = $estr;
 HaxeType.NoOp.__enum__ = HaxeType;
-var ClassType = { __ename__ : true, __constructs__ : ["Class","VirtualClass","ChildClass"] }
-ClassType.Class = function(pack,name) { var $x = ["Class",0,pack,name]; $x.__enum__ = ClassType; $x.toString = $estr; return $x; }
-ClassType.VirtualClass = function(pack,name) { var $x = ["VirtualClass",1,pack,name]; $x.__enum__ = ClassType; $x.toString = $estr; return $x; }
-ClassType.ChildClass = function(pack,parent_name,name) { var $x = ["ChildClass",2,pack,parent_name,name]; $x.__enum__ = ClassType; $x.toString = $estr; return $x; }
 var DocletHelper = function() { }
 DocletHelper.__name__ = true;
 DocletHelper.docletType = function(doc) {
@@ -78,72 +71,49 @@ var Publish = function() { }
 Publish.__name__ = true;
 Publish.main = function() {
 	var dest = env.opts.destination;
-	var class_registry = new haxe.ds.StringMap();
-	Publish.ensureDirectory(dest);
 	exports.publish = function(taffy,opts,tutorial) {
 		taffy.sort("longname, version, since");
-		var haxe_types = taffy().map(function(x,y) {
-			var type = (function($this) {
-				var $r;
-				var _g = DocletHelper.docletType(x);
-				$r = (function($this) {
-					var $r;
-					var $e = (_g);
-					switch( $e[1] ) {
-					case 2:
-						var doc = $e[2];
-						$r = (function($this) {
-							var $r;
-							var name = doc.name;
-							var cls = doc.memberof;
-							if(ClassRegistry.uc(doc.name)) {
-								cls = doc.memberof + "." + Std.string(doc.name);
-								name = "new";
-							}
-							var cls_type = ClassRegistry.resolve(cls,name);
-							$r = HaxeType.HaxeFunction(cls_type,name,doc);
-							return $r;
-						}($this));
-						break;
-					case 1:
-						var doc = $e[2];
-						$r = (function($this) {
-							var $r;
-							var cls_type = ClassRegistry.resolve(doc.memberof,doc.name);
-							$r = HaxeType.HaxeMember(cls_type,doc.name,doc);
-							return $r;
-						}($this));
-						break;
-					case 7:
-						$r = (function($this) {
-							var $r;
-							throw "Unknown doclet type: " + x.kind;
-							$r = HaxeType.NoOp;
-							return $r;
-						}($this));
-						break;
-					default:
-						$r = HaxeType.NoOp;
+		var haxetypes = taffy().map(function(x,y) {
+			var _g = DocletHelper.docletType(x);
+			var $e = (_g);
+			switch( $e[1] ) {
+			case 2:
+				var doc = $e[2];
+				if(Publish.uc(doc.name)) {
+					var cls_pack = doc.memberof + "." + Std.string(doc.name);
+					var clazz = Publish.makeClazz(cls_pack);
+					return HaxeType.HaxeConstructor({ clazz : Publish.makeClazz(cls_pack), file : Publish.pack2file(cls_pack), doc : doc});
+				} else {
+					var clazz = Publish.makeClazz(doc.memberof);
+					var args = { name : doc.name, clazz : clazz, file : Publish.pack2file(Std.string(clazz.pack) + "." + Std.string(doc.name)), doc : doc};
+					switch(doc.scope) {
+					case "instance":
+						return HaxeType.HaxeInstanceMethod(args);
+					case "static":
+						return HaxeType.HaxeStaticMethod(args);
 					}
-					return $r;
-				}($this));
-				return $r;
-			}(this));
-			return type;
+				}
+				break;
+			case 1:
+				var doc = $e[2];
+				break;
+			case 7:
+				throw "Unknown doclet type: " + x.kind;
+				break;
+			default:
+				null;
+			}
+			return HaxeType.NoOp;
 		});
+		var packs = { };
 		var _g = 0;
-		while(_g < haxe_types.length) {
-			var t = haxe_types[_g];
+		while(_g < haxetypes.length) {
+			var t = haxetypes[_g];
 			++_g;
 			var $e = (t);
 			switch( $e[1] ) {
-			case 1:
-				var doc = $e[4], name = $e[3], cls = $e[2];
-				Publish.ensureClassFile(cls,dest);
-				break;
-			case 2:
-				var doc = $e[4], name = $e[3], cls = $e[2];
-				Publish.ensureClassFile(cls,dest);
+			case 0:
+				var args = $e[2];
 				break;
 			default:
 				null;
@@ -151,101 +121,44 @@ Publish.main = function() {
 		}
 	};
 }
-Publish.classSig = function(cls,debug) {
-	if(debug == null) debug = false;
-	var arr = (function($this) {
-		var $r;
-		var $e = (cls);
-		switch( $e[1] ) {
-		case 0:
-			var name = $e[3], pack = $e[2];
-			$r = [pack,name];
-			break;
-		case 1:
-			var name = $e[3], pack = $e[2];
-			$r = debug?[pack,"#" + name + "#"]:[pack,name];
-			break;
-		case 2:
-			var name = $e[4], parent_name = $e[3], pack = $e[2];
-			$r = [pack,parent_name,name];
-			break;
+Publish.extractPacks = function(pack) {
+	var packs = pack.split(".");
+	var cur_obj = Publish.pack_obj;
+	var _g = 0;
+	while(_g < packs.length) {
+		var p = packs[_g];
+		++_g;
+		if(cur_obj.packs.exists(p)) cur_obj = cur_obj.packs.get(p); else {
+			var new_pack = { packs : new haxe.ds.StringMap(), classes : new haxe.ds.StringMap()};
+			cur_obj.packs.set(p,new_pack);
+			cur_obj = new_pack;
 		}
-		return $r;
-	}(this));
-	return arr.filter(function(x) {
-		return x != "";
-	}).join(".");
+	}
+	return cur_obj;
+}
+Publish.makeClazz = function(memberof) {
+	var packs = memberof.split(".");
+	var cls = packs.pop();
+	var pack = packs.join(".");
+	var clazz = Publish.lc(cls)?{ name : Publish.titleCase(cls), pack : Publish.extractPacks(packs.join(".")), 'native' : memberof}:{ name : cls, pack : Publish.extractPacks(memberof)};
+	var cur_clazzes = clazz.pack.classes;
+	if(cur_clazzes.exists(clazz.name)) {
+		var cur_clazz = cur_clazzes.get(clazz.name);
+		if(cur_clazz["native"] != clazz["native"]) throw "Two different definitions for ${clazz.name} : $clazz and $cur_clazz";
+	} else cur_clazzes.set(clazz.name,clazz);
+	return clazz;
+}
+Publish.lc = function(arg) {
+	return new EReg("^[a-z]","").match(arg);
+}
+Publish.uc = function(arg) {
+	return new EReg("^[A-Z]","").match(arg);
+}
+Publish.titleCase = function(arg) {
+	return arg.charAt(0).toUpperCase() + arg.substring(1);
 }
 Publish.pack2file = function(arg) {
 	return arg.split(".").join(require('path').sep) + ".hx";
-}
-Publish.pack2dir = function(arg) {
-	return arg.split(".").join(require('path').sep);
-}
-Publish.ensureClassFile = function(cls,dest) {
-	var $e = (cls);
-	switch( $e[1] ) {
-	case 0:
-		var name = $e[3], pack = $e[2];
-		Publish.ensureDirectory(dest + require('path').sep + Publish.pack2dir(pack + "." + name));
-		break;
-	case 1:
-		var name = $e[3], pack = $e[2];
-		Publish.ensureDirectory(dest + require('path').sep + Publish.pack2dir(pack + "." + name));
-		break;
-	case 2:
-		var name = $e[4], parent_name = $e[3], pack = $e[2];
-		Publish.ensureDirectory(dest + require('path').sep + Publish.pack2dir(pack + "." + name));
-		break;
-	}
-}
-Publish.ensureDirectory = function(path) {
-	if(!require('fs').existsSync(path)) {
-		var dirs = path.split(require('path').sep);
-		var current = "";
-		var _g = 0;
-		while(_g < dirs.length) {
-			var d = dirs[_g];
-			++_g;
-			current += d + require('path').sep;
-			if(!require('fs').existsSync(current)) require('fs').mkdirSync(current);
-		}
-	}
-}
-var ClassRegistry = function() { }
-ClassRegistry.__name__ = true;
-ClassRegistry.resolve = function(packAndClass,name) {
-	if(ClassRegistry.registry == null) ClassRegistry.registry = new haxe.ds.StringMap();
-	var arg_class = ClassRegistry.hxClass(packAndClass);
-	if(ClassRegistry.registry.exists(packAndClass)) {
-		var reg_class = ClassRegistry.registry.get(packAndClass);
-		var reg_type = reg_class[0];
-		var arg_type = arg_class[0];
-		if(reg_type != arg_type) throw "field " + name + " has a problem:  mismatch in " + packAndClass + " between " + reg_type + " and " + arg_type;
-	} else ClassRegistry.registry.set(packAndClass,arg_class);
-	return arg_class;
-}
-ClassRegistry.hxClass = function(packAndClass) {
-	if(packAndClass == null) return null;
-	var packs = packAndClass.split(".");
-	var cls = packs.pop();
-	if(ClassRegistry.lc(cls)) {
-		var uc_cls = ClassRegistry.titleCase(cls);
-		var fullname = packs.join(".") + "." + uc_cls;
-		return ClassType.VirtualClass(packs.join("."),uc_cls);
-	} else if(ClassRegistry.uc(packs[packs.length - 1])) {
-		var parent_cls = packs.pop();
-		return ClassType.ChildClass(packs.join("."),parent_cls,cls);
-	} else if(packs.length > 2 && ClassRegistry.uc(packs[packs.length - 2])) throw "Error: " + cls + " has invalid class signature for " + packAndClass + ": too many title case objects to convert to classes"; else return ClassType.Class(packs.join("."),cls);
-}
-ClassRegistry.lc = function(arg) {
-	return new EReg("^[a-z]","").match(arg);
-}
-ClassRegistry.uc = function(arg) {
-	return new EReg("^[A-Z]","").match(arg);
-}
-ClassRegistry.titleCase = function(arg) {
-	return arg.charAt(0).toUpperCase() + arg.substring(1);
 }
 var Std = function() { }
 Std.__name__ = true;
