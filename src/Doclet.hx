@@ -93,17 +93,11 @@ typedef Clazz = {
     pack    : Pack,
     name    : String,
     ?native : String,
-    ?fields : {
-        ?static_var      : Array<String>,
-        ?instance_var    : Array<String>,
-        ?static_method   : Array<String>,
-        ?instance_method : Array<String>,
-    }
+    ?fields : Array<String>,
 }
 
 typedef HaxeBase<DocType> = {
     clazz : Clazz,
-    file : String,
     doc : DocType,
 }
 

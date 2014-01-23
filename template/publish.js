@@ -57,7 +57,10 @@ var EReg = function(r,opt) {
 };
 EReg.__name__ = true;
 EReg.prototype = {
-	match: function(s) {
+	replace: function(s,by) {
+		return s.replace(this.r,by);
+	}
+	,match: function(s) {
 		if(this.r.global) this.r.lastIndex = 0;
 		this.r.m = this.r.exec(s);
 		this.r.s = s;
@@ -65,11 +68,21 @@ EReg.prototype = {
 	}
 	,__class__: EReg
 }
+var HxOverrides = function() { }
+HxOverrides.__name__ = true;
+HxOverrides.iter = function(a) {
+	return { cur : 0, arr : a, hasNext : function() {
+		return this.cur < this.arr.length;
+	}, next : function() {
+		return this.arr[this.cur++];
+	}};
+}
 var IMap = function() { }
 IMap.__name__ = true;
 var Publish = function() { }
 Publish.__name__ = true;
 Publish.main = function() {
+	Publish.pack_obj = { packs : new haxe.ds.StringMap(), classes : new haxe.ds.StringMap()};
 	var dest = env.opts.destination;
 	exports.publish = function(taffy,opts,tutorial) {
 		taffy.sort("longname, version, since");
@@ -81,11 +94,15 @@ Publish.main = function() {
 				var doc = $e[2];
 				if(Publish.uc(doc.name)) {
 					var cls_pack = doc.memberof + "." + Std.string(doc.name);
+					var sig = "" + doc.comment + "\npublic function new();";
 					var clazz = Publish.makeClazz(cls_pack);
-					return HaxeType.HaxeConstructor({ clazz : Publish.makeClazz(cls_pack), file : Publish.pack2file(cls_pack), doc : doc});
+					clazz.fields.push(sig);
+					return HaxeType.HaxeConstructor({ clazz : clazz, doc : doc});
 				} else {
 					var clazz = Publish.makeClazz(doc.memberof);
-					var args = { name : doc.name, clazz : clazz, file : Publish.pack2file(Std.string(clazz.pack) + "." + Std.string(doc.name)), doc : doc};
+					var args = { name : doc.name, clazz : clazz, doc : doc};
+					Publish.parseParams(doc.comment);
+					console.log("-----");
 					switch(doc.scope) {
 					case "instance":
 						return HaxeType.HaxeInstanceMethod(args);
@@ -105,21 +122,34 @@ Publish.main = function() {
 			}
 			return HaxeType.NoOp;
 		});
-		var packs = { };
-		var _g = 0;
-		while(_g < haxetypes.length) {
-			var t = haxetypes[_g];
-			++_g;
-			var $e = (t);
-			switch( $e[1] ) {
-			case 0:
-				var args = $e[2];
-				break;
-			default:
-				null;
-			}
-		}
+		Publish.ensureDirectory(dest);
+		Publish.render(Publish.pack_obj,dest);
 	};
+}
+Publish.render = function(pack,cwd) {
+	Publish.ensureDirectory(cwd);
+	var $it0 = pack.classes.keys();
+	while( $it0.hasNext() ) {
+		var c = $it0.next();
+		var clazz = pack.classes.get(c);
+		var file = cwd + require('path').sep + clazz.name + ".hx";
+	}
+	var $it1 = pack.packs.keys();
+	while( $it1.hasNext() ) {
+		var p = $it1.next();
+		var next_pack = pack.packs.get(p);
+		var next_dir = cwd + require('path').sep + p;
+		Publish.render(next_pack,next_dir);
+	}
+}
+Publish.parseParams = function(arg) {
+	var reg = new EReg("@.*","");
+	var params = arg.split("\n").filter(function(x) {
+		return reg.match(x);
+	}).map(function(x) {
+		return new EReg("^[^@]*","").replace(x,"");
+	}).join("\n");
+	console.log(params);
 }
 Publish.extractPacks = function(pack) {
 	var packs = pack.split(".");
@@ -140,7 +170,7 @@ Publish.makeClazz = function(memberof) {
 	var packs = memberof.split(".");
 	var cls = packs.pop();
 	var pack = packs.join(".");
-	var clazz = Publish.lc(cls)?{ name : Publish.titleCase(cls), pack : Publish.extractPacks(packs.join(".")), 'native' : memberof}:{ name : cls, pack : Publish.extractPacks(memberof)};
+	var clazz = Publish.lc(cls)?{ name : Publish.titleCase(cls), pack : Publish.extractPacks(packs.join(".")), 'native' : memberof, fields : []}:{ name : cls, pack : Publish.extractPacks(packs.join(".")), fields : []};
 	var cur_clazzes = clazz.pack.classes;
 	if(cur_clazzes.exists(clazz.name)) {
 		var cur_clazz = cur_clazzes.get(clazz.name);
@@ -160,6 +190,19 @@ Publish.titleCase = function(arg) {
 Publish.pack2file = function(arg) {
 	return arg.split(".").join(require('path').sep) + ".hx";
 }
+Publish.ensureDirectory = function(path) {
+	if(!require('fs').existsSync(path)) {
+		var dirs = path.split(require('path').sep);
+		var current = "";
+		var _g = 0;
+		while(_g < dirs.length) {
+			var d = dirs[_g];
+			++_g;
+			current += d + require('path').sep;
+			if(!require('fs').existsSync(current)) require('fs').mkdirSync(current);
+		}
+	}
+}
 var Std = function() { }
 Std.__name__ = true;
 Std.string = function(s) {
@@ -178,7 +221,14 @@ haxe.ds.StringMap = function() {
 haxe.ds.StringMap.__name__ = true;
 haxe.ds.StringMap.__interfaces__ = [IMap];
 haxe.ds.StringMap.prototype = {
-	exists: function(key) {
+	keys: function() {
+		var a = [];
+		for( var key in this.h ) {
+		if(this.h.hasOwnProperty(key)) a.push(key.substr(1));
+		}
+		return HxOverrides.iter(a);
+	}
+	,exists: function(key) {
 		return this.h.hasOwnProperty("$" + key);
 	}
 	,get: function(key) {

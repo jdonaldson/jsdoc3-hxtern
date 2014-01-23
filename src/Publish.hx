@@ -13,6 +13,10 @@ using Doclet.DocletHelper;
 class Publish {
     static var pack_obj : Pack;
     static function main() {
+        pack_obj = {
+            packs   : new Map<String, Pack>(),
+            classes : new Map<String, Clazz>()
+        };
         var dest = Env.opts.destination;
         Exports.publish = function(taffy: Taffy, opts: PublishOpts, tutorial: Dynamic ){
             taffy.sort("longname, version, since");
@@ -22,10 +26,11 @@ class Publish {
                         if (uc(doc.name)){
                             // assume constructor. Use name as class
                             var cls_pack = doc.memberof + '.' + doc.name;
+                            var sig = '${doc.comment}\npublic function new();';
                             var clazz = makeClazz(cls_pack);
+                            clazz.fields.push(sig);
                             return HaxeConstructor({
-                                clazz : makeClazz(cls_pack),
-                                file  : pack2file(cls_pack),
+                                clazz : clazz,
                                 doc   : doc
                             });
                         } else {
@@ -34,13 +39,18 @@ class Publish {
                             var args = {
                                 name  : doc.name,
                                 clazz : clazz,
-                                file  : pack2file(clazz.pack + '.' + doc.name),
                                 doc   : doc
                             };
-
+                            parseParams(doc.comment);
+                            trace('-----');
                             switch(doc.scope){
-                                case "instance" : return HaxeInstanceMethod(args);
-                                case "static"   : return HaxeStaticMethod(args);
+                                case "instance" : {
+                                    // clazz.push('${doc.comment}\npublic function ${args.name}
+                                    return HaxeInstanceMethod(args);
+                                }
+                                case "static"   : {
+                                    return HaxeStaticMethod(args);
+                                }
                             }
                         }
                     }
@@ -52,17 +62,32 @@ class Publish {
                 }
                 return NoOp;
             });
-            var packs:Dynamic = {};
-            for (t in haxetypes){
-                switch(t){
-                    case HaxeConstructor(args) : {
-
-                    }
-                    default : null;
-                }
-            }
-
+            ensureDirectory(dest);
+            render(pack_obj, dest);
         }
+        
+    }
+
+    public static function render(pack : Pack, cwd : String){
+        ensureDirectory(cwd);
+        for (c in pack.classes.keys()){
+           var clazz = pack.classes.get(c); 
+           var file = cwd + Path.sep + clazz.name + '.hx';
+           // Fs.writeFileSync(file, 'woeafijwoefijawoefij');
+        }
+        for (p in pack.packs.keys()){
+            var next_pack  = pack.packs.get(p);
+            var next_dir = cwd + Path.sep + p;
+            render(next_pack,  next_dir);
+        }
+    }
+    public static function parseParams(arg : String){
+        var reg = ~/@.*/;
+        var params = arg.split('\n')
+          .filter(function(x) return reg.match(x))
+          .map(function(x) return ~/^[^@]*/.replace(x, ''))
+          .join('\n');
+        trace(params);
     }
 
     /**
@@ -99,10 +124,12 @@ class Publish {
         {
             name   : titleCase(cls),
             pack   : extractPacks(packs.join('.')),
-            native : memberof
+            native : memberof,
+            fields : []
         } : {
             name : cls,
-            pack : extractPacks(memberof)
+            pack : extractPacks(packs.join('.')),
+            fields : []
         }
         var cur_clazzes = clazz.pack.classes;
         if (cur_clazzes.exists(clazz.name)){
@@ -123,6 +150,19 @@ class Publish {
     }
     public static function pack2file(arg: String) {
         return arg.split('.').join(Path.sep) + '.hx';
+    }
+
+    static function ensureDirectory(path : String){
+        if(!Fs.existsSync(path)){
+            var dirs = path.split(Path.sep);
+            var current = '';
+            for (d in dirs){
+                current += d + Path.sep;
+                if(!Fs.existsSync(current)){
+                    Fs.mkdirSync(current);
+                }
+            }
+        }
     }
 
 }
