@@ -1,0 +1,3 @@
+[submodule "ext/doctrine"]
+	path = ext/doctrine
+	url = https://github.com/Constellation/doctrine.git

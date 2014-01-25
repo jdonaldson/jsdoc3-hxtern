@@ -101,9 +101,8 @@ Publish.main = function() {
 				} else {
 					var clazz = Publish.makeClazz(doc.memberof);
 					var args = { name : doc.name, clazz : clazz, doc : doc};
-					var k = require('catharsis').parse("{function(!chrome.alarms.Alarm): void} callback",{ jsdoc : true});
-					console.log(k);
-					Publish.parseSignature(doc.comment);
+					var k = require('doctrine').parse("@param {function(!chrome.alarms.Alarm): void} callback",{ unwrap : true});
+					console.log(k.tags[0].type.params);
 					console.log("-----");
 					switch(doc.scope) {
 					case "instance":

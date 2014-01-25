@@ -6,7 +6,7 @@ import Fs;
 import Path;
 import Taffy;
 import Doclet;
-import Catharsis;
+import Doctrine;
 
 using Taffy.TaffyHelper;
 using Doclet.DocletHelper;
@@ -43,9 +43,9 @@ class Publish {
                                 doc   : doc
                             };
                             
-                            var k = Catharsis.parse("{function(!chrome.alarms.Alarm): void} callback", {jsdoc:true});
-                            trace(k);
-                            parseSignature(doc.comment);
+                            var k = Doctrine.parse("@param {function(!chrome.alarms.Alarm): void} callback", {unwrap : true});
+                            trace(k.tags[0].type.params);
+                            // parseSignature(doc.comment);
                             trace('-----');
                             switch(doc.scope){
                                 case "instance" : {
