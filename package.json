@@ -1,0 +1,15 @@
+{
+    "name"         : "jsdoc3-hxtern",
+    "preferGlobal" : true,
+    "version"      : "0.0.1",
+    "author"       : "jdonaldson@gmail.com",
+    "description"  : "a plugin for jsdoc3 that generates Haxe externs",
+    "license"      : "MIT",
+    "repository"   : {
+        "type" : "git",
+        "url"  : "https : //github.com/jdonaldson/jsdoc3-hxtern.git"
+    },
+    "dependencies" : {
+        "doctrine" : "0.2.0"
+    }
+}
