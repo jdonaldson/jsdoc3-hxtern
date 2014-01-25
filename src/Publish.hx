@@ -6,6 +6,7 @@ import Fs;
 import Path;
 import Taffy;
 import Doclet;
+import Catharsis;
 
 using Taffy.TaffyHelper;
 using Doclet.DocletHelper;
@@ -41,7 +42,10 @@ class Publish {
                                 clazz : clazz,
                                 doc   : doc
                             };
-                            parseParams(doc.comment);
+                            
+                            var k = Catharsis.parse("{function(!chrome.alarms.Alarm): void} callback", {jsdoc:true});
+                            trace(k);
+                            parseSignature(doc.comment);
                             trace('-----');
                             switch(doc.scope){
                                 case "instance" : {
@@ -81,7 +85,7 @@ class Publish {
             render(next_pack,  next_dir);
         }
     }
-    public static function parseParams(arg : String){
+    public static function parseSignature(arg : String){
         var reg = ~/@.*/;
         var params = arg.split('\n')
           .filter(function(x) return reg.match(x))

@@ -101,7 +101,9 @@ Publish.main = function() {
 				} else {
 					var clazz = Publish.makeClazz(doc.memberof);
 					var args = { name : doc.name, clazz : clazz, doc : doc};
-					Publish.parseParams(doc.comment);
+					var k = require('catharsis').parse("{function(!chrome.alarms.Alarm): void} callback",{ jsdoc : true});
+					console.log(k);
+					Publish.parseSignature(doc.comment);
 					console.log("-----");
 					switch(doc.scope) {
 					case "instance":
@@ -142,7 +144,7 @@ Publish.render = function(pack,cwd) {
 		Publish.render(next_pack,next_dir);
 	}
 }
-Publish.parseParams = function(arg) {
+Publish.parseSignature = function(arg) {
 	var reg = new EReg("@.*","");
 	var params = arg.split("\n").filter(function(x) {
 		return reg.match(x);
