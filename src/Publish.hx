@@ -1,12 +1,12 @@
 /**
   The main template plugin file
  **/
+import Doclet;
+import Doctrine;
 import Exports;
 import Fs;
 import Path;
 import Taffy;
-import Doclet;
-import Doctrine;
 
 using Taffy.TaffyHelper;
 using Doclet.DocletHelper;
@@ -24,6 +24,8 @@ class Publish {
             var haxetypes = taffy.retrieve().map(function(x,y){
                 switch(x.docletType()){
                     case DocletFunction(doc) : {
+                        trace(Doctrine.parse(doc.comment, {unwrap :true}));
+                        trace('-----');
                         if (uc(doc.name)){
                             // assume constructor. Use name as class
                             var cls_pack = doc.memberof + '.' + doc.name;
@@ -43,10 +45,6 @@ class Publish {
                                 doc   : doc
                             };
                             
-                            var k = Doctrine.parse("@param {function(!chrome.alarms.Alarm): void} callback", {unwrap : true});
-                            trace(k.tags[0].type.params);
-                            // parseSignature(doc.comment);
-                            trace('-----');
                             switch(doc.scope){
                                 case "instance" : {
                                     // clazz.push('${doc.comment}\npublic function ${args.name}

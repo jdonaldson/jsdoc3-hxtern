@@ -92,6 +92,8 @@ Publish.main = function() {
 			switch( $e[1] ) {
 			case 2:
 				var doc = $e[2];
+				console.log(require('doctrine').parse(doc.comment,{ unwrap : true}));
+				console.log("-----");
 				if(Publish.uc(doc.name)) {
 					var cls_pack = doc.memberof + "." + Std.string(doc.name);
 					var sig = "" + doc.comment + "\npublic function new();";
@@ -101,9 +103,6 @@ Publish.main = function() {
 				} else {
 					var clazz = Publish.makeClazz(doc.memberof);
 					var args = { name : doc.name, clazz : clazz, doc : doc};
-					var k = require('doctrine').parse("@param {function(!chrome.alarms.Alarm): void} callback",{ unwrap : true});
-					console.log(k.tags[0].type.params);
-					console.log("-----");
 					switch(doc.scope) {
 					case "instance":
 						return HaxeType.HaxeInstanceMethod(args);
