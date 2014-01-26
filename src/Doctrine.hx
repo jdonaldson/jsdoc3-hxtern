@@ -20,17 +20,17 @@ typedef DocStructure = {
 }
 
 typedef Tag = {
-    title       : String,
-    description : String,
-    type        : UnknownType
+    title        : String,
+    ?description : String,
+    ?type        : UnknownType
 }
 
 typedef UnknownType = { type : String }
 
 typedef FunctionType = {
     > UnknownType,
-    params : Dynamic,
-    result : { type : Dynamic }
+    params : Array<UnknownType>,
+    result : UnknownType 
 }
 
 /**
@@ -54,7 +54,8 @@ typedef UnionType = {
 
 typedef NonNullableType = {
     > UnknownType,
-    expression : UnknownType
+    expression : UnknownType,
+    prefix : Bool
 }
 
 typedef TypeApplication = {
@@ -62,4 +63,29 @@ typedef TypeApplication = {
     applications : Array<UnknownType>
 }
 
+typedef VoidLiteral = UnknownType
 
+class DoctrineHelper {
+    public static function chooseType(type : UnknownType) : DoctrineType {
+        switch(type.type){
+            case "FunctionType"    : return FunctionType    (cast type);
+            case "NameExpression"  : return NameExpression  (cast type);
+            case "NonNullableType" : return NonNullableType (cast type);
+            case "OptionalType"    : return OptionalType    (cast type);
+            case "TypeApplication" : return TypeApplication (cast type);
+            case "UnionType"       : return UnionType       (cast type);
+            case "VoidLiteral"     : return VoidLiteral     (cast type);
+            default                : throw 'error! $type is an unknown doctrine type.';
+        }
+    }
+}
+
+enum DoctrineType {
+    FunctionType    ( type : FunctionType); 
+    NameExpression  ( type : NameExpression);
+    OptionalType    ( type : OptionalType);
+    UnionType       ( type : UnionType);
+    NonNullableType ( type : NonNullableType);
+    TypeApplication ( type : TypeApplication);
+    VoidLiteral     ( type : VoidLiteral);
+}

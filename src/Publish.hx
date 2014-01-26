@@ -10,6 +10,7 @@ import Taffy;
 
 using Taffy.TaffyHelper;
 using Doclet.DocletHelper;
+using Doctrine.DoctrineHelper;
 
 class Publish {
     static var pack_obj : Pack;
@@ -19,13 +20,27 @@ class Publish {
             classes : new Map<String, Clazz>()
         };
         var dest = Env.opts.destination;
-        Exports.publish = function(taffy: Taffy, opts: PublishOpts, tutorial: Dynamic ){
+        Exports.publish = function(taffy: Taffy, opts: PublishOpts, tutorial : Dynamic){
             taffy.sort("longname, version, since");
             var haxetypes = taffy.retrieve().map(function(x,y){
                 switch(x.docletType()){
                     case DocletFunction(doc) : {
-                        if (uc(doc.name)){
-                            // assume constructor. Use name as class
+                        var p = Doctrine.parse(x.comment, {unwrap:true});
+                        var is_constructor = false;
+                        var params = [];
+                        var ret = 'Void';
+                        for (t in p.tags){
+                            if (t.title == 'constructor' || t.title == 'interface'){
+                                is_constructor = true;
+                            } else if (t.title == 'param'){
+                                params.push(renderType(t.type));
+
+                            } else if (t.title == 'return'){
+                                ret = renderType(t.type);
+                            }
+                        }
+
+                        if (is_constructor){
                             var cls_pack = doc.memberof + '.' + doc.name;
                             var sig = '${doc.comment}\npublic function new();';
                             var clazz = makeClazz(cls_pack);
@@ -55,11 +70,6 @@ class Publish {
                         }
                     }
                     case DocletMember(doc) : {
-                        var p = Doctrine.parse(x.comment, {unwrap:true});
-                        trace(doc.name);
-                        trace(doc.comment);
-                        trace(Std.string(p.tags[0]));
-                        trace('-----');
                     }
                     case DocletUnknown(_) : {
                         throw('Unknown doclet type: ${x.kind}');
@@ -72,6 +82,37 @@ class Publish {
             render(pack_obj, dest);
         }
         
+    }
+    public static function renderType(type : UnknownType){
+        switch(type.chooseType()){
+            case FunctionType(type) : {
+                var params = [for (t in type.params)  renderType(t)].join('->');
+                var res = params + '->' +  renderType(type.result);
+                trace(res);
+            }
+            case OptionalType(type): {
+                return '?' + renderType(type.expression);
+            }
+            case NonNullableType(type) : {
+                return renderType(type.expression);
+            }
+            case NameExpression(type) : {
+                return nameExpressionType(type.name);
+            }
+            case VoidLiteral(type):{
+                return 'Void';
+            }
+            default : throw 'unknown type in renderType: $type';
+        }
+        return '';
+    }
+    public static function nameExpressionType(expression:String){
+        if (~/\./.match(expression)) return expression;
+        switch(expression){
+            case 'boolean' : return 'Bool';
+            case 'string'  : return 'String';
+            default : throw 'unknown name expression: $expression';
+        }
     }
 
     public static function render(pack : Pack, cwd : String){

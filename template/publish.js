@@ -51,6 +51,36 @@ DocletHelper.docletType = function(doc) {
 		return $r;
 	}(this));
 }
+var DoctrineHelper = function() { }
+DoctrineHelper.__name__ = true;
+DoctrineHelper.chooseType = function(type) {
+	switch(type.type) {
+	case "FunctionType":
+		return DoctrineType.FunctionType(type);
+	case "NameExpression":
+		return DoctrineType.NameExpression(type);
+	case "NonNullableType":
+		return DoctrineType.NonNullableType(type);
+	case "OptionalType":
+		return DoctrineType.OptionalType(type);
+	case "TypeApplication":
+		return DoctrineType.TypeApplication(type);
+	case "UnionType":
+		return DoctrineType.UnionType(type);
+	case "VoidLiteral":
+		return DoctrineType.VoidLiteral(type);
+	default:
+		throw "error! " + Std.string(type) + " is an unknown doctrine type.";
+	}
+}
+var DoctrineType = { __ename__ : true, __constructs__ : ["FunctionType","NameExpression","OptionalType","UnionType","NonNullableType","TypeApplication","VoidLiteral"] }
+DoctrineType.FunctionType = function(type) { var $x = ["FunctionType",0,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.NameExpression = function(type) { var $x = ["NameExpression",1,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.OptionalType = function(type) { var $x = ["OptionalType",2,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.UnionType = function(type) { var $x = ["UnionType",3,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.NonNullableType = function(type) { var $x = ["NonNullableType",4,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.TypeApplication = function(type) { var $x = ["TypeApplication",5,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.VoidLiteral = function(type) { var $x = ["VoidLiteral",6,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
 var EReg = function(r,opt) {
 	opt = opt.split("u").join("");
 	this.r = new RegExp(r,opt);
@@ -89,7 +119,17 @@ Publish.main = function() {
 			switch( $e[1] ) {
 			case 2:
 				var doc = $e[2];
-				if(Publish.uc(doc.name)) {
+				var p = require('doctrine').parse(x.comment,{ unwrap : true});
+				var is_constructor = false;
+				var params = [];
+				var ret = "Void";
+				var _g1 = 0, _g2 = p.tags;
+				while(_g1 < _g2.length) {
+					var t = _g2[_g1];
+					++_g1;
+					if(t.title == "constructor" || t.title == "interface") is_constructor = true; else if(t.title == "param") params.push(Publish.renderType(t.type)); else if(t.title == "return") ret = Publish.renderType(t.type);
+				}
+				if(is_constructor) {
 					var cls_pack = doc.memberof + "." + Std.string(doc.name);
 					var sig = "" + doc.comment + "\npublic function new();";
 					var clazz = Publish.makeClazz(cls_pack);
@@ -108,11 +148,6 @@ Publish.main = function() {
 				break;
 			case 1:
 				var doc = $e[2];
-				var p = require('doctrine').parse(x.comment,{ unwrap : true});
-				console.log(doc.name);
-				console.log(doc.comment);
-				console.log(Std.string(p.tags[0]));
-				console.log("-----");
 				break;
 			case 7:
 				throw "Unknown doclet type: " + x.kind;
@@ -125,6 +160,57 @@ Publish.main = function() {
 		Publish.ensureDirectory(dest);
 		Publish.render(Publish.pack_obj,dest);
 	};
+}
+Publish.renderType = function(type) {
+	var _g = DoctrineHelper.chooseType(type);
+	var $e = (_g);
+	switch( $e[1] ) {
+	case 0:
+		var type1 = $e[2];
+		var params = ((function($this) {
+			var $r;
+			var _g1 = [];
+			{
+				var _g2 = 0, _g3 = type1.params;
+				while(_g2 < _g3.length) {
+					var t = _g3[_g2];
+					++_g2;
+					_g1.push(Publish.renderType(t));
+				}
+			}
+			$r = _g1;
+			return $r;
+		}(this))).join("->");
+		var res = params + "->" + Publish.renderType(type1.result);
+		console.log(res);
+		break;
+	case 2:
+		var type1 = $e[2];
+		return "?" + Publish.renderType(type1.expression);
+	case 4:
+		var type1 = $e[2];
+		return Publish.renderType(type1.expression);
+	case 1:
+		var type1 = $e[2];
+		return Publish.nameExpressionType(type1.name);
+	case 6:
+		var type1 = $e[2];
+		return "Void";
+	default:
+		throw "unknown type in renderType: " + Std.string(type);
+	}
+	return "";
+}
+Publish.nameExpressionType = function(expression) {
+	if(new EReg("\\.","").match(expression)) return expression;
+	switch(expression) {
+	case "boolean":
+		return "Bool";
+	case "string":
+		return "String";
+	default:
+		throw "unknown name expression: " + expression;
+	}
 }
 Publish.render = function(pack,cwd) {
 	Publish.ensureDirectory(cwd);
