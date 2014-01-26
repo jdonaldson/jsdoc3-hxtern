@@ -23,6 +23,7 @@ class Publish {
         Exports.publish = function(taffy: Taffy, opts: PublishOpts, tutorial : Dynamic){
             taffy.sort("longname, version, since");
             var haxetypes = taffy.retrieve().map(function(x,y){
+                trace(x);
                 switch(x.docletType()){
                     case DocletFunction(doc) : {
                         var p = Doctrine.parse(x.comment, {unwrap:true});
@@ -84,34 +85,48 @@ class Publish {
         
     }
     public static function renderType(type : UnknownType){
+        trace(type);
         switch(type.chooseType()){
             case FunctionType(type) : {
                 var params = [for (t in type.params)  renderType(t)].join('->');
-                var res = params + '->' +  renderType(type.result);
-                trace(res);
+                var result = 'Void';
+                if (type.result != null) result = renderType(type.result);
+
+                var res = '$params -> $result';
             }
             case OptionalType(type): {
                 return '?' + renderType(type.expression);
             }
             case NonNullableType(type) : {
-                return renderType(type.expression);
+                var res =  renderType(type.expression);
             }
             case NameExpression(type) : {
                 return nameExpressionType(type.name);
             }
-            case VoidLiteral(type):{
-                return 'Void';
+            case VoidLiteral(type) : return 'Void'; 
+            case AllLiteral(type)  : return 'Dynamic'; 
+            case UnionType(type)   : {
+                return renderType(type.elements[0]);
             }
-            default : throw 'unknown type in renderType: $type';
+            case TypeApplication(type) : {
+                var container = renderType(type.expression);
+                var params = [for (a in type.applications) renderType(a)].join(', ');
+                return '$container<$params>';
+                
+            }
+            case _ : throw 'unknown type in renderType: $type';
         }
         return '';
     }
-    public static function nameExpressionType(expression:String){
-        if (~/\./.match(expression)) return expression;
+
+    public static function nameExpressionType(expression : String){
         switch(expression){
             case 'boolean' : return 'Bool';
             case 'string'  : return 'String';
-            default : throw 'unknown name expression: $expression';
+            case 'Array'   : return 'Array';
+            case 'number'  : return 'Float';
+            case 'Object'  : return 'Dynamic';
+            default        : return expression;
         }
     }
 

@@ -64,6 +64,8 @@ typedef TypeApplication = {
 }
 
 typedef VoidLiteral = UnknownType
+typedef NullLiteral = UnknownType
+typedef AllLiteral = UnknownType
 
 class DoctrineHelper {
     public static function chooseType(type : UnknownType) : DoctrineType {
@@ -75,17 +77,40 @@ class DoctrineHelper {
             case "TypeApplication" : return TypeApplication (cast type);
             case "UnionType"       : return UnionType       (cast type);
             case "VoidLiteral"     : return VoidLiteral     (cast type);
+            case "NullLiteral"     : return NullLiteral     (cast type);
+            case "AllLiteral"      : return AllLiteral     (cast type);
             default                : throw 'error! $type is an unknown doctrine type.';
         }
     }
 }
 
+            // NullableLiteral: 'NullableLiteral',
+            // AllLiteral: 'AllLiteral',
+            // NullLiteral: 'NullLiteral',
+            // UndefinedLiteral: 'UndefinedLiteral',
+            // VoidLiteral: 'VoidLiteral',
+            // UnionType: 'UnionType',
+            // ArrayType: 'ArrayType',
+            // RecordType: 'RecordType',
+            // FieldType: 'FieldType',
+            // FunctionType: 'FunctionType',
+            // ParameterType: 'ParameterType',
+            // RestType: 'RestType',
+            // NonNullableType: 'NonNullableType',
+            // OptionalType: 'OptionalType',
+            // NullableType: 'NullableType',
+            // NameExpression: 'NameExpression',
+            // TypeApplication: 'TypeApplication'
+
 enum DoctrineType {
-    FunctionType    ( type : FunctionType); 
-    NameExpression  ( type : NameExpression);
-    OptionalType    ( type : OptionalType);
-    UnionType       ( type : UnionType);
-    NonNullableType ( type : NonNullableType);
-    TypeApplication ( type : TypeApplication);
-    VoidLiteral     ( type : VoidLiteral);
+    FunctionType    (type : FunctionType); 
+    NameExpression  (type : NameExpression);
+    OptionalType    (type : OptionalType);
+    UnionType       (type : UnionType);
+    NonNullableType (type : NonNullableType);
+    TypeApplication (type : TypeApplication);
+    VoidLiteral     (type : VoidLiteral);
+    NullLiteral     (type : NullLiteral);
+    AllLiteral      (type : AllLiteral);
+    Unknown         (type : UnknownType);
 }
