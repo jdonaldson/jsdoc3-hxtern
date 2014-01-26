@@ -57,10 +57,7 @@ var EReg = function(r,opt) {
 };
 EReg.__name__ = true;
 EReg.prototype = {
-	replace: function(s,by) {
-		return s.replace(this.r,by);
-	}
-	,match: function(s) {
+	match: function(s) {
 		if(this.r.global) this.r.lastIndex = 0;
 		this.r.m = this.r.exec(s);
 		this.r.s = s;
@@ -92,8 +89,6 @@ Publish.main = function() {
 			switch( $e[1] ) {
 			case 2:
 				var doc = $e[2];
-				console.log(require('doctrine').parse(doc.comment,{ unwrap : true}));
-				console.log("-----");
 				if(Publish.uc(doc.name)) {
 					var cls_pack = doc.memberof + "." + Std.string(doc.name);
 					var sig = "" + doc.comment + "\npublic function new();";
@@ -113,6 +108,11 @@ Publish.main = function() {
 				break;
 			case 1:
 				var doc = $e[2];
+				var p = require('doctrine').parse(x.comment,{ unwrap : true});
+				console.log(doc.name);
+				console.log(doc.comment);
+				console.log(Std.string(p.tags[0]));
+				console.log("-----");
 				break;
 			case 7:
 				throw "Unknown doclet type: " + x.kind;
@@ -141,15 +141,6 @@ Publish.render = function(pack,cwd) {
 		var next_dir = cwd + require('path').sep + p;
 		Publish.render(next_pack,next_dir);
 	}
-}
-Publish.parseSignature = function(arg) {
-	var reg = new EReg("@.*","");
-	var params = arg.split("\n").filter(function(x) {
-		return reg.match(x);
-	}).map(function(x) {
-		return new EReg("^[^@]*","").replace(x,"");
-	}).join("\n");
-	console.log(params);
 }
 Publish.extractPacks = function(pack) {
 	var packs = pack.split(".");

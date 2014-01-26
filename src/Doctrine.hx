@@ -22,5 +22,44 @@ typedef DocStructure = {
 typedef Tag = {
     title       : String,
     description : String,
-    type        : Dynamic
+    type        : UnknownType
 }
+
+typedef UnknownType = { type : String }
+
+typedef FunctionType = {
+    > UnknownType,
+    params : Dynamic,
+    result : { type : Dynamic }
+}
+
+/**
+  Typedef or class
+ **/
+typedef NameExpression = {
+    > UnknownType,
+    name : String
+}
+
+
+typedef OptionalType = {
+    > UnknownType,
+    expression : UnknownType
+}
+
+typedef UnionType = {
+    > UnknownType,
+    elements : Array<UnknownType>
+}
+
+typedef NonNullableType = {
+    > UnknownType,
+    expression : UnknownType
+}
+
+typedef TypeApplication = {
+    expression : UnknownType,
+    applications : Array<UnknownType>
+}
+
+

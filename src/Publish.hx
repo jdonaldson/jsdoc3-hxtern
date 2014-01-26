@@ -24,8 +24,6 @@ class Publish {
             var haxetypes = taffy.retrieve().map(function(x,y){
                 switch(x.docletType()){
                     case DocletFunction(doc) : {
-                        trace(Doctrine.parse(doc.comment, {unwrap :true}));
-                        trace('-----');
                         if (uc(doc.name)){
                             // assume constructor. Use name as class
                             var cls_pack = doc.memberof + '.' + doc.name;
@@ -56,7 +54,13 @@ class Publish {
                             }
                         }
                     }
-                    case DocletMember(doc) : {}
+                    case DocletMember(doc) : {
+                        var p = Doctrine.parse(x.comment, {unwrap:true});
+                        trace(doc.name);
+                        trace(doc.comment);
+                        trace(Std.string(p.tags[0]));
+                        trace('-----');
+                    }
                     case DocletUnknown(_) : {
                         throw('Unknown doclet type: ${x.kind}');
                     }
@@ -82,14 +86,6 @@ class Publish {
             var next_dir = cwd + Path.sep + p;
             render(next_pack,  next_dir);
         }
-    }
-    public static function parseSignature(arg : String){
-        var reg = ~/@.*/;
-        var params = arg.split('\n')
-          .filter(function(x) return reg.match(x))
-          .map(function(x) return ~/^[^@]*/.replace(x, ''))
-          .join('\n');
-        trace(params);
     }
 
     /**
