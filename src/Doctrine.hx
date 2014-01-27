@@ -22,7 +22,8 @@ typedef DocStructure = {
 typedef Tag = {
     title        : String,
     ?description : String,
-    ?type        : UnknownType
+    ?type        : UnknownType,
+    ?name        : String
 }
 
 typedef UnknownType = { type : String }
@@ -63,23 +64,42 @@ typedef TypeApplication = {
     applications : Array<UnknownType>
 }
 
-typedef VoidLiteral = UnknownType
-typedef NullLiteral = UnknownType
-typedef AllLiteral = UnknownType
+typedef FieldType = {
+    >UnknownType,
+    key : String,
+    value : UnknownType
+}
+
+typedef RecordType = {
+    >UnknownType,
+    fields : Array<UnknownType>
+}
+
+typedef VoidLiteral  = UnknownType
+typedef NullLiteral  = UnknownType
+typedef AllLiteral   = UnknownType
+typedef UndefinedLiteral = UnionType
+
+typedef NullableType = NonNullableType
+
 
 class DoctrineHelper {
     public static function chooseType(type : UnknownType) : DoctrineType {
         switch(type.type){
-            case "FunctionType"    : return FunctionType    (cast type);
-            case "NameExpression"  : return NameExpression  (cast type);
-            case "NonNullableType" : return NonNullableType (cast type);
-            case "OptionalType"    : return OptionalType    (cast type);
-            case "TypeApplication" : return TypeApplication (cast type);
-            case "UnionType"       : return UnionType       (cast type);
-            case "VoidLiteral"     : return VoidLiteral     (cast type);
-            case "NullLiteral"     : return NullLiteral     (cast type);
-            case "AllLiteral"      : return AllLiteral     (cast type);
-            default                : throw 'error! $type is an unknown doctrine type.';
+            case "FunctionType"     : return FunctionType     (cast type);
+            case "NameExpression"   : return NameExpression   (cast type);
+            case "NullableType"     : return NullableType     (cast type);
+            case "NonNullableType"  : return NonNullableType  (cast type);
+            case "OptionalType"     : return OptionalType     (cast type);
+            case "TypeApplication"  : return TypeApplication  (cast type);
+            case "UnionType"        : return UnionType        (cast type);
+            case "RecordType"       : return RecordType       (cast type);
+            case "FieldType"        : return FieldType        (cast type);
+            case "UndefinedLiteral" : return UndefinedLiteral (cast type);
+            case "VoidLiteral"      : return VoidLiteral      (cast type);
+            case "NullLiteral"      : return NullLiteral      (cast type);
+            case "AllLiteral"       : return AllLiteral       (cast type);
+            default                 : throw 'error! $type is an unknown doctrine type.';
         }
     }
 }
@@ -103,14 +123,18 @@ class DoctrineHelper {
             // TypeApplication: 'TypeApplication'
 
 enum DoctrineType {
-    FunctionType    (type : FunctionType); 
-    NameExpression  (type : NameExpression);
-    OptionalType    (type : OptionalType);
-    UnionType       (type : UnionType);
-    NonNullableType (type : NonNullableType);
-    TypeApplication (type : TypeApplication);
-    VoidLiteral     (type : VoidLiteral);
-    NullLiteral     (type : NullLiteral);
-    AllLiteral      (type : AllLiteral);
-    Unknown         (type : UnknownType);
+    FunctionType     ( type : FunctionType);
+    NameExpression   ( type : NameExpression);
+    OptionalType     ( type : OptionalType);
+    UnionType        ( type : UnionType);
+    RecordType       ( type : RecordType);
+    FieldType        ( type : FieldType);
+    NullableType     ( type : NullableType);
+    NonNullableType  ( type : NonNullableType);
+    TypeApplication  ( type : TypeApplication);
+    VoidLiteral      ( type : VoidLiteral);
+    UndefinedLiteral ( type : UndefinedLiteral);
+    NullLiteral      ( type : NullLiteral);
+    AllLiteral       ( type : AllLiteral);
+    Unknown          ( type : UnknownType);
 }

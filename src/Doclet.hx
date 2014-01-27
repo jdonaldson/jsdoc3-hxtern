@@ -76,11 +76,11 @@ enum DocletType {
 }
 
 enum HaxeType {
-    HaxeConstructor    ( args : HaxeBase<DocletFunction>);
-    HaxeInstanceField  ( args : HaxeMember<DocletMember>);
-    HaxeStaticField    ( args : HaxeMember<DocletMember> );
-    HaxeInstanceMethod ( args : HaxeFunction<DocletFunction> );
-    HaxeStaticMethod   ( args : HaxeFunction<DocletFunction> );
+    HaxeConstructor    (args : HaxeBase<DocletFunction>);
+    HaxeInstanceField  (args : HaxeMember<DocletMember>);
+    HaxeStaticField    (args : HaxeMember<DocletMember> );
+    HaxeInstanceMethod (args : HaxeFunction<DocletFunction> );
+    HaxeStaticMethod   (args : HaxeFunction<DocletFunction> );
     NoOp;
 }
 
@@ -99,6 +99,7 @@ typedef Clazz = {
 typedef HaxeBase<DocType> = {
     clazz : Clazz,
     doc : DocType,
+    signature : String,
 }
 
 typedef HaxeMember<DocType> = {

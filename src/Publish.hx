@@ -23,7 +23,10 @@ class Publish {
         Exports.publish = function(taffy: Taffy, opts: PublishOpts, tutorial : Dynamic){
             taffy.sort("longname, version, since");
             var haxetypes = taffy.retrieve().map(function(x,y){
-                trace(x);
+                var comment = '';
+                if (x.description != null && x.description.length > 0) {
+                    comment = '\t/**\n\t  ${x.description}\n\t */\n';
+                }
                 switch(x.docletType()){
                     case DocletFunction(doc) : {
                         var p = Doctrine.parse(x.comment, {unwrap:true});
@@ -34,43 +37,61 @@ class Publish {
                             if (t.title == 'constructor' || t.title == 'interface'){
                                 is_constructor = true;
                             } else if (t.title == 'param'){
-                                params.push(renderType(t.type));
+                                var optional = '';
+                                if (isOptional(t.type)) optional = '?';
+                                params.push('$optional${keywordDodge(t.name)}: ${renderType(t.type)}');
 
                             } else if (t.title == 'return'){
                                 ret = renderType(t.type);
                             }
                         }
+                        var param_list = params.join(', ');
 
                         if (is_constructor){
                             var cls_pack = doc.memberof + '.' + doc.name;
-                            var sig = '${doc.comment}\npublic function new();';
+                            var sig = '${comment}\tpublic function new($param_list);';
                             var clazz = makeClazz(cls_pack);
                             clazz.fields.push(sig);
                             return HaxeConstructor({
-                                clazz : clazz,
-                                doc   : doc
+                                clazz     : clazz,
+                                doc       : doc,
+                                signature : sig
                             });
                         } else {
                             var clazz = makeClazz(doc.memberof);
 
                             var args = {
-                                name  : doc.name,
-                                clazz : clazz,
-                                doc   : doc
+                                name      : doc.name,
+                                clazz     : clazz,
+                                doc       : doc,
+                                signature : ''
                             };
                             
                             switch(doc.scope){
                                 case "instance" : {
-                                    // clazz.push('${doc.comment}\npublic function ${args.name}
+                                    // clazz.push('${doc.description}\npublic function ${args.name}
+                                    var sig = '${comment}\tpublic function ${doc.name}($param_list);';
+                                    args.signature = sig;
                                     return HaxeInstanceMethod(args);
                                 }
                                 case "static"   : {
+                                    var sig = '${comment}\tpublic static function ${doc.name}($param_list);';
+                                    args.signature = sig; 
                                     return HaxeStaticMethod(args);
                                 }
                             }
                         }
                     }
                     case DocletMember(doc) : {
+                        var p = Doctrine.parse(x.comment, {unwrap:true});
+                        trace(p);
+                        var clazz = makeClazz(doc.memberof);
+                        var args = {
+                            name : doc.name,
+                            clazz : clazz ,
+                            doc : doc,
+                            signature : ''
+                        }
                     }
                     case DocletUnknown(_) : {
                         throw('Unknown doclet type: ${x.kind}');
@@ -84,22 +105,47 @@ class Publish {
         }
         
     }
+    public static function isOptional(type : UnknownType) : Bool {
+        switch(type.chooseType()){
+            case OptionalType(doc) : return true;
+            default : return false;
+        }
+    }
+    public static function keywordDodge(arg : String) : String{
+        switch(arg){
+            case 'callback' : return "_callback";
+            default : return arg;
+        }
+    }
     public static function renderType(type : UnknownType){
-        trace(type);
         switch(type.chooseType()){
             case FunctionType(type) : {
                 var params = [for (t in type.params)  renderType(t)].join('->');
                 var result = 'Void';
                 if (type.result != null) result = renderType(type.result);
+                if (params == '') params = 'Void';
 
-                var res = '$params -> $result';
+                return '$params->$result';
             }
             case OptionalType(type): {
-                return '?' + renderType(type.expression);
+                return renderType(type.expression);
             }
             case NonNullableType(type) : {
-                var res =  renderType(type.expression);
+                return renderType(type.expression);
             }
+            case NullableType(type) : {
+                return renderType(type.expression);
+            }
+            case RecordType(type) : {
+                var fields = [for (f in type.fields) renderType(f)].join(', ');
+                var res = '{$fields}';
+                return res;
+            }
+            case FieldType(type) : {
+                var value = renderType(type.value);
+                return '${type.key}: $value';
+            }
+            case UndefinedLiteral(type) : { return ''; }
             case NameExpression(type) : {
                 return nameExpressionType(type.name);
             }
