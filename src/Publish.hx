@@ -25,7 +25,8 @@ class Publish {
             var haxetypes = taffy.retrieve().map(function(x,y){
                 var comment = '';
                 if (x.description != null && x.description.length > 0) {
-                    comment = '\t/**\n\t  ${x.description}\n\t */\n';
+                    var fixed_description = x.description.split('\n').join('\n\t');
+                    comment = '\t/**\n\t$fixed_description\n\t */\n';
                 }
                 switch(x.docletType()){
                     case DocletFunction(doc) : {
@@ -84,13 +85,23 @@ class Publish {
                     }
                     case DocletMember(doc) : {
                         var p = Doctrine.parse(x.comment, {unwrap:true});
-                        trace(p);
                         var clazz = makeClazz(doc.memberof);
                         var args = {
                             name : doc.name,
                             clazz : clazz ,
                             doc : doc,
                             signature : ''
+                        }
+                        var type = 'Dynamic';
+                        for (t in p.tags){
+                            if (t.title == 'type') {
+                                type = renderType(t.type);
+                            }
+                        }
+                        switch(doc.scope){
+                            case "instance" : {
+                                var sig = '${comment}\tpublic var ${doc.name}: $type;';
+                            }
                         }
                     }
                     case DocletUnknown(_) : {
@@ -154,6 +165,7 @@ class Publish {
             case UnionType(type)   : {
                 return renderType(type.elements[0]);
             }
+            case NullableLiteral(type) : return 'Dynamic';
             case TypeApplication(type) : {
                 var container = renderType(type.expression);
                 var params = [for (a in type.applications) renderType(a)].join(', ');
