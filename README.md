@@ -10,6 +10,16 @@ It's currently in an incomplete alpha state.
 
 
 ## Basic workflow
+
+You use jsdoc3-hxtern with jsdoc as follows:
+
+```bash
+jsdoc -t /path/to/jsdoc3-hxtern some_js_library.js
+```
+The haxe externs will be written to a directory called "out" in the current
+working directory.  See the documentation for [jsdoc command line
+options](http://usejsdoc.org/about-commandline.html) for more details.
+
 jsdoc3-hxtern works by plugging directly into jsdoc, extracting individual 
 methods, variables, modules, and classes, and then expanding the type
 information there using a special closure compiler-comaptible parser called
