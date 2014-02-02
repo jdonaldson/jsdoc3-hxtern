@@ -75,38 +75,23 @@ enum DocletType {
     DocletUnknown  (doc: Doclet);
 }
 
-enum HaxeType {
-    HaxeConstructor    (args : HaxeBase<DocletFunction>);
-    HaxeInstanceField  (args : HaxeMember<DocletMember>);
-    HaxeStaticField    (args : HaxeMember<DocletMember> );
-    HaxeInstanceMethod (args : HaxeFunction<DocletFunction> );
-    HaxeStaticMethod   (args : HaxeFunction<DocletFunction> );
-    NoOp;
-}
 
 typedef Pack = {
+    name : String,
     packs : Map<String,Pack>,
     classes : Map<String, Clazz>, 
 }
 
 typedef Clazz = {
+    type    : String,
     pack    : Pack,
     name    : String,
+    pname   : String, 
     ?native : String,
     ?fields : Array<String>,
+    ?comment : String,
 }
 
-typedef HaxeBase<DocType> = {
-    clazz : Clazz,
-    doc : DocType,
-    signature : String,
-}
-
-typedef HaxeMember<DocType> = {
-    >HaxeBase<DocType>,
-    name : String
-}
-typedef HaxeFunction<DocType> = HaxeMember<DocType>;
 
 
 
@@ -157,3 +142,28 @@ typedef FunctionParam = {
     description   : String,
     name          : String
 }
+
+
+// Unused
+
+// enum HaxeType {
+//     HaxeConstructor    (args : HaxeBase<DocletFunction>);
+//     HaxeInstanceField  (args : HaxeMember<DocletMember>);
+//     HaxeStaticField    (args : HaxeMember<DocletMember> );
+//     HaxeInstanceMethod (args : HaxeFunction<DocletFunction> );
+//     HaxeStaticMethod   (args : HaxeFunction<DocletFunction> );
+//     NoOp;
+// }
+
+// typedef HaxeBase<DocType> = {
+//     clazz : Clazz,
+//     doc : DocType,
+//     signature : String,
+// }
+
+// typedef HaxeMember<DocType> = {
+//     >HaxeBase<DocType>,
+//     name : String
+// }
+
+// typedef HaxeFunction<DocType> = HaxeMember<DocType>;

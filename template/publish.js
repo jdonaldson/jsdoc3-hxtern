@@ -9,15 +9,6 @@ DocletType.DocletConstant = function(doc) { var $x = ["DocletConstant",4,doc]; $
 DocletType.DocletTypedef = function(doc) { var $x = ["DocletTypedef",5,doc]; $x.__enum__ = DocletType; $x.toString = $estr; return $x; }
 DocletType.DocletPackage = function(doc) { var $x = ["DocletPackage",6,doc]; $x.__enum__ = DocletType; $x.toString = $estr; return $x; }
 DocletType.DocletUnknown = function(doc) { var $x = ["DocletUnknown",7,doc]; $x.__enum__ = DocletType; $x.toString = $estr; return $x; }
-var HaxeType = { __ename__ : true, __constructs__ : ["HaxeConstructor","HaxeInstanceField","HaxeStaticField","HaxeInstanceMethod","HaxeStaticMethod","NoOp"] }
-HaxeType.HaxeConstructor = function(args) { var $x = ["HaxeConstructor",0,args]; $x.__enum__ = HaxeType; $x.toString = $estr; return $x; }
-HaxeType.HaxeInstanceField = function(args) { var $x = ["HaxeInstanceField",1,args]; $x.__enum__ = HaxeType; $x.toString = $estr; return $x; }
-HaxeType.HaxeStaticField = function(args) { var $x = ["HaxeStaticField",2,args]; $x.__enum__ = HaxeType; $x.toString = $estr; return $x; }
-HaxeType.HaxeInstanceMethod = function(args) { var $x = ["HaxeInstanceMethod",3,args]; $x.__enum__ = HaxeType; $x.toString = $estr; return $x; }
-HaxeType.HaxeStaticMethod = function(args) { var $x = ["HaxeStaticMethod",4,args]; $x.__enum__ = HaxeType; $x.toString = $estr; return $x; }
-HaxeType.NoOp = ["NoOp",5];
-HaxeType.NoOp.toString = $estr;
-HaxeType.NoOp.__enum__ = HaxeType;
 var DocletHelper = function() { }
 DocletHelper.__name__ = true;
 DocletHelper.docletType = function(doc) {
@@ -55,16 +46,30 @@ var DoctrineHelper = function() { }
 DoctrineHelper.__name__ = true;
 DoctrineHelper.chooseType = function(type) {
 	switch(type.type) {
+	case "AllLiteral":
+		return DoctrineType.AllLiteral(type);
+	case "FieldType":
+		return DoctrineType.FieldType(type);
 	case "FunctionType":
 		return DoctrineType.FunctionType(type);
 	case "NameExpression":
 		return DoctrineType.NameExpression(type);
 	case "NonNullableType":
 		return DoctrineType.NonNullableType(type);
+	case "NullLiteral":
+		return DoctrineType.NullLiteral(type);
+	case "NullableLiteral":
+		return DoctrineType.NullableLiteral(type);
+	case "NullableType":
+		return DoctrineType.NullableType(type);
 	case "OptionalType":
 		return DoctrineType.OptionalType(type);
+	case "RecordType":
+		return DoctrineType.RecordType(type);
 	case "TypeApplication":
 		return DoctrineType.TypeApplication(type);
+	case "UndefinedLiteral":
+		return DoctrineType.UndefinedLiteral(type);
 	case "UnionType":
 		return DoctrineType.UnionType(type);
 	case "VoidLiteral":
@@ -73,14 +78,22 @@ DoctrineHelper.chooseType = function(type) {
 		throw "error! " + Std.string(type) + " is an unknown doctrine type.";
 	}
 }
-var DoctrineType = { __ename__ : true, __constructs__ : ["FunctionType","NameExpression","OptionalType","UnionType","NonNullableType","TypeApplication","VoidLiteral"] }
-DoctrineType.FunctionType = function(type) { var $x = ["FunctionType",0,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
-DoctrineType.NameExpression = function(type) { var $x = ["NameExpression",1,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
-DoctrineType.OptionalType = function(type) { var $x = ["OptionalType",2,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
-DoctrineType.UnionType = function(type) { var $x = ["UnionType",3,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+var DoctrineType = { __ename__ : true, __constructs__ : ["AllLiteral","FieldType","FunctionType","NameExpression","NonNullableType","NullLiteral","NullableLiteral","NullableType","OptionalType","RecordType","TypeApplication","UndefinedLiteral","UnionType","Unknown","VoidLiteral"] }
+DoctrineType.AllLiteral = function(type) { var $x = ["AllLiteral",0,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.FieldType = function(type) { var $x = ["FieldType",1,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.FunctionType = function(type) { var $x = ["FunctionType",2,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.NameExpression = function(type) { var $x = ["NameExpression",3,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
 DoctrineType.NonNullableType = function(type) { var $x = ["NonNullableType",4,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
-DoctrineType.TypeApplication = function(type) { var $x = ["TypeApplication",5,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
-DoctrineType.VoidLiteral = function(type) { var $x = ["VoidLiteral",6,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.NullLiteral = function(type) { var $x = ["NullLiteral",5,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.NullableLiteral = function(type) { var $x = ["NullableLiteral",6,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.NullableType = function(type) { var $x = ["NullableType",7,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.OptionalType = function(type) { var $x = ["OptionalType",8,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.RecordType = function(type) { var $x = ["RecordType",9,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.TypeApplication = function(type) { var $x = ["TypeApplication",10,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.UndefinedLiteral = function(type) { var $x = ["UndefinedLiteral",11,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.UnionType = function(type) { var $x = ["UnionType",12,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.Unknown = function(type) { var $x = ["Unknown",13,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.VoidLiteral = function(type) { var $x = ["VoidLiteral",14,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
 var EReg = function(r,opt) {
 	opt = opt.split("u").join("");
 	this.r = new RegExp(r,opt);
@@ -109,11 +122,17 @@ IMap.__name__ = true;
 var Publish = function() { }
 Publish.__name__ = true;
 Publish.main = function() {
-	Publish.pack_obj = { packs : new haxe.ds.StringMap(), classes : new haxe.ds.StringMap()};
+	Publish.class_list = [];
+	Publish.pack_obj = { name : "", packs : new haxe.ds.StringMap(), classes : new haxe.ds.StringMap()};
 	var dest = env.opts.destination;
 	exports.publish = function(taffy,opts,tutorial) {
 		taffy.sort("longname, version, since");
-		var haxetypes = taffy().map(function(x,y) {
+		taffy().each(function(x,y) {
+			var comment = "";
+			if(x.description != null && x.description.length > 0) {
+				var fixed_description = x.description.split("\n").join("\n\t  ");
+				comment = "\t/**\n\t  " + fixed_description + "\n\t */\n";
+			}
 			var _g = DocletHelper.docletType(x);
 			var $e = (_g);
 			switch( $e[1] ) {
@@ -127,27 +146,101 @@ Publish.main = function() {
 				while(_g1 < _g2.length) {
 					var t = _g2[_g1];
 					++_g1;
-					if(t.title == "constructor" || t.title == "interface") is_constructor = true; else if(t.title == "param") params.push(Publish.renderType(t.type)); else if(t.title == "return") ret = Publish.renderType(t.type);
+					if(t.title == "constructor" || t.title == "interface") is_constructor = true; else if(t.title == "param") {
+						var optional = "";
+						if(Publish.isOptional(t.type)) optional = "?";
+						params.push("" + optional + Publish.keywordDodge(t.name) + ": " + Publish.renderType(t.type));
+					} else if(t.title == "return") ret = Publish.renderType(t.type);
 				}
+				var param_list = params.join(", ");
 				if(is_constructor) {
 					var cls_pack = doc.memberof + "." + Std.string(doc.name);
-					var sig = "" + doc.comment + "\npublic function new();";
+					var sig = "\tpublic function new(" + param_list + ");";
 					var clazz = Publish.makeClazz(cls_pack);
 					clazz.fields.push(sig);
-					return HaxeType.HaxeConstructor({ clazz : clazz, doc : doc});
 				} else {
 					var clazz = Publish.makeClazz(doc.memberof);
-					var args = { name : doc.name, clazz : clazz, doc : doc};
+					var args = { name : doc.name, clazz : clazz, doc : doc, signature : ""};
 					switch(doc.scope) {
 					case "instance":
-						return HaxeType.HaxeInstanceMethod(args);
+						var sig = "\tpublic function " + Std.string(doc.name) + "(" + param_list + "): " + ret + ";";
+						clazz.fields.push(sig);
+						break;
 					case "static":
-						return HaxeType.HaxeStaticMethod(args);
+						var sig = "\tpublic static function " + Std.string(doc.name) + "(" + param_list + "): " + ret + ";";
+						clazz.fields.push(sig);
+						break;
 					}
 				}
 				break;
 			case 1:
 				var doc = $e[2];
+				var p = require('doctrine').parse(x.comment,{ unwrap : true});
+				var clazz = Publish.makeClazz(doc.memberof);
+				var args = { name : doc.name, clazz : clazz, doc : doc, signature : ""};
+				var type = "Dynamic";
+				var _g1 = 0, _g2 = p.tags;
+				while(_g1 < _g2.length) {
+					var t = _g2[_g1];
+					++_g1;
+					if(t.title == "type") type = Publish.renderType(t.type);
+				}
+				switch(doc.scope) {
+				case "instance":
+					var sig = "" + comment + "\tpublic var " + Std.string(doc.name) + ": " + type + ";";
+					clazz.fields.push(sig);
+					break;
+				case "static":
+					var sig = "" + comment + "\tpublic static var " + Std.string(doc.name) + ": " + type + ";";
+					clazz.fields.push(sig);
+					break;
+				}
+				break;
+			case 3:
+				var doc = $e[2];
+				var name = doc.name;
+				if(doc.memberof != null && doc.memberof.length > 0) name = doc.memberof + "." + name;
+				var p = require('doctrine').parse(x.comment,{ unwrap : true});
+				var is_constructor = false;
+				var params = [];
+				var ret = "Void";
+				var _g1 = 0, _g2 = p.tags;
+				while(_g1 < _g2.length) {
+					var t = _g2[_g1];
+					++_g1;
+					if(t.title == "constructor" || t.title == "interface") is_constructor = true; else if(t.title == "param") {
+						var optional = "";
+						if(Publish.isOptional(t.type)) optional = "?";
+						params.push("" + optional + Publish.keywordDodge(t.name) + ": " + Publish.renderType(t.type));
+					} else if(t.title == "return") ret = Publish.renderType(t.type);
+				}
+				var clazz = Publish.makeClazz(name);
+				var param_list = params.join(", ");
+				clazz.comment = "" + Std.string(x.name) + " : generated by hxtern";
+				if(x.description != null) clazz.comment += "\n" + x.description;
+				if(is_constructor) {
+					var cls_pack = doc.name;
+					if(doc.memberof != null) cls_pack = doc.memberof + "." + Std.string(doc.name);
+					var sig = "\tpublic function new(" + param_list + ");";
+					var clazz1 = Publish.makeClazz(cls_pack);
+					clazz1.fields.push(sig);
+				}
+				break;
+			case 5:
+				var doc = $e[2];
+				var name = doc.name;
+				if(doc.memberof != null && doc.memberof.length > 0) name = doc.memberof + "." + name;
+				var p = require('doctrine').parse(x.comment,{ unwrap : true});
+				var td = "";
+				var _g1 = 0, _g2 = p.tags;
+				while(_g1 < _g2.length) {
+					var t = _g2[_g1];
+					++_g1;
+					if(t.title == "typedef") td = Publish.renderType(t.type);
+				}
+				if(td == "") td = "{}";
+				var clazz = Publish.makeClazz(name,true);
+				clazz.fields = [td];
 				break;
 			case 7:
 				throw "Unknown doclet type: " + x.kind;
@@ -155,17 +248,37 @@ Publish.main = function() {
 			default:
 				null;
 			}
-			return HaxeType.NoOp;
 		});
 		Publish.ensureDirectory(dest);
 		Publish.render(Publish.pack_obj,dest);
+		var all_classes_content = Publish.class_list.join("\n");
+		require('fs').writeFileSync("all_classes.hxml",all_classes_content);
 	};
+}
+Publish.isOptional = function(type) {
+	var _g = DoctrineHelper.chooseType(type);
+	var $e = (_g);
+	switch( $e[1] ) {
+	case 8:
+		var doc = $e[2];
+		return true;
+	default:
+		return false;
+	}
+}
+Publish.keywordDodge = function(arg) {
+	switch(arg) {
+	case "callback":
+		return "_callback";
+	default:
+		return arg;
+	}
 }
 Publish.renderType = function(type) {
 	var _g = DoctrineHelper.chooseType(type);
 	var $e = (_g);
 	switch( $e[1] ) {
-	case 0:
+	case 2:
 		var type1 = $e[2];
 		var params = ((function($this) {
 			var $r;
@@ -181,35 +294,101 @@ Publish.renderType = function(type) {
 			$r = _g1;
 			return $r;
 		}(this))).join("->");
-		var res = params + "->" + Publish.renderType(type1.result);
-		console.log(res);
-		break;
-	case 2:
+		var result = "Void";
+		if(type1.result != null) result = Publish.renderType(type1.result);
+		if(params == "") params = "Void";
+		return "" + params + "->" + result;
+	case 8:
 		var type1 = $e[2];
-		return "?" + Publish.renderType(type1.expression);
+		return Publish.renderType(type1.expression);
 	case 4:
 		var type1 = $e[2];
 		return Publish.renderType(type1.expression);
+	case 7:
+		var type1 = $e[2];
+		return Publish.renderType(type1.expression);
+	case 9:
+		var type1 = $e[2];
+		var fields = ((function($this) {
+			var $r;
+			var _g1 = [];
+			{
+				var _g2 = 0, _g3 = type1.fields;
+				while(_g2 < _g3.length) {
+					var f = _g3[_g2];
+					++_g2;
+					_g1.push(Publish.renderType(f));
+				}
+			}
+			$r = _g1;
+			return $r;
+		}(this))).join(", ");
+		var res = "{" + fields + "}";
+		return res;
 	case 1:
 		var type1 = $e[2];
+		var value = Publish.renderType(type1.value);
+		return "" + type1.key + ": " + value;
+	case 11:
+		var type1 = $e[2];
+		return "";
+	case 3:
+		var type1 = $e[2];
 		return Publish.nameExpressionType(type1.name);
-	case 6:
+	case 14:
 		var type1 = $e[2];
 		return "Void";
+	case 0:
+		var type1 = $e[2];
+		return "Dynamic";
+	case 12:
+		var type1 = $e[2];
+		return Publish.renderType(type1.elements[0]);
+	case 6:
+		var type1 = $e[2];
+		return "Dynamic";
+	case 10:
+		var type1 = $e[2];
+		var container = Publish.renderType(type1.expression);
+		if(container == "Dynamic" && type1.applications.length > 1) container = "Map";
+		var params = ((function($this) {
+			var $r;
+			var _g1 = [];
+			{
+				var _g2 = 0, _g3 = type1.applications;
+				while(_g2 < _g3.length) {
+					var a = _g3[_g2];
+					++_g2;
+					_g1.push(Publish.renderType(a));
+				}
+			}
+			$r = _g1;
+			return $r;
+		}(this))).join(", ");
+		return "" + container + "<" + params + ">";
 	default:
 		throw "unknown type in renderType: " + Std.string(type);
 	}
 	return "";
 }
 Publish.nameExpressionType = function(expression) {
-	if(new EReg("\\.","").match(expression)) return expression;
 	switch(expression) {
 	case "boolean":
 		return "Bool";
 	case "string":
 		return "String";
+	case "Array":
+		return "Array";
+	case "number":
+		return "Float";
+	case "Object":
+		return "Dynamic";
+	case "Function":
+		return "Dynamic";
+	case "void":
+		return "Void";
 	default:
-		throw "unknown name expression: " + expression;
+		return expression;
 	}
 }
 Publish.render = function(pack,cwd) {
@@ -218,7 +397,23 @@ Publish.render = function(pack,cwd) {
 	while( $it0.hasNext() ) {
 		var c = $it0.next();
 		var clazz = pack.classes.get(c);
-		var file = cwd + require('path').sep + clazz.name + ".hx";
+		var clazz_name = clazz.name;
+		var package_line = "package " + pack.name + ";";
+		if(clazz.pname != null) {
+			clazz_name = clazz.pname;
+			package_line = "";
+		} else {
+			var name = pack.name == ""?c:pack.name + "." + c;
+			Publish.class_list.push(name);
+		}
+		var file = cwd + require('path').sep + clazz_name + ".hx";
+		clazz.fields = clazz.fields.filter(function(x) {
+			return x != null;
+		});
+		var content = clazz.fields.join("\n\n");
+		if(clazz.comment == null) clazz.comment = "  " + clazz_name + " : generated by hxtern";
+		if(clazz.type == "class") content = "/**\n" + clazz.comment + "\n*/\n" + package_line + "\nclass " + c + "{\n" + content + "\n}"; else content = "/**\n" + clazz.comment + "\n*/\n" + package_line + "\ntypedef " + c + " = " + content + "\n\n";
+		require('fs').appendFileSync(file,content);
 	}
 	var $it1 = pack.packs.keys();
 	while( $it1.hasNext() ) {
@@ -231,27 +426,37 @@ Publish.render = function(pack,cwd) {
 Publish.extractPacks = function(pack) {
 	var packs = pack.split(".");
 	var cur_obj = Publish.pack_obj;
+	var cur_name = "";
 	var _g = 0;
 	while(_g < packs.length) {
 		var p = packs[_g];
 		++_g;
+		if(cur_name == "") cur_name = p; else cur_name = [cur_name,p].join(".");
 		if(cur_obj.packs.exists(p)) cur_obj = cur_obj.packs.get(p); else {
-			var new_pack = { packs : new haxe.ds.StringMap(), classes : new haxe.ds.StringMap()};
+			var new_pack = { name : cur_name, packs : new haxe.ds.StringMap(), classes : new haxe.ds.StringMap()};
 			cur_obj.packs.set(p,new_pack);
 			cur_obj = new_pack;
 		}
 	}
 	return cur_obj;
 }
-Publish.makeClazz = function(memberof) {
+Publish.makeClazz = function(memberof,is_typedef) {
+	if(is_typedef == null) is_typedef = false;
 	var packs = memberof.split(".");
 	var cls = packs.pop();
-	var pack = packs.join(".");
-	var clazz = Publish.lc(cls)?{ name : Publish.titleCase(cls), pack : Publish.extractPacks(packs.join(".")), 'native' : memberof, fields : []}:{ name : cls, pack : Publish.extractPacks(packs.join(".")), fields : []};
+	var pname = null;
+	if(packs.length > 0) {
+		var pcls = packs.pop();
+		if(Publish.uc(pcls)) pname = pcls; else packs.push(pcls);
+	}
+	var pack = Publish.extractPacks(packs.join("."));
+	var type = is_typedef?"typedef":"class";
+	var clazz = Publish.lc(cls)?{ name : Publish.titleCase(cls), type : type, pack : pack, pname : pname, 'native' : memberof, fields : []}:{ name : cls, type : is_typedef?"typedef":"class", pname : pname, pack : pack, fields : []};
 	var cur_clazzes = clazz.pack.classes;
 	if(cur_clazzes.exists(clazz.name)) {
 		var cur_clazz = cur_clazzes.get(clazz.name);
-		if(cur_clazz["native"] != clazz["native"]) throw "Two different definitions for ${clazz.name} : $clazz and $cur_clazz";
+		if(cur_clazz["native"] != clazz["native"]) throw "Two different definitions for " + clazz.name + " : " + Std.string(clazz) + " and " + Std.string(cur_clazz);
+		clazz = cur_clazz;
 	} else cur_clazzes.set(clazz.name,clazz);
 	return clazz;
 }
