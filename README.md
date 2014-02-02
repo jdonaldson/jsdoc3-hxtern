@@ -24,8 +24,36 @@ After doclets are extracted and type information gathered from doctrine, there
 are still several situations that require special handling.  
  
 -  It's typical to have static methods attached to "modules" in javascript,
-   rather than to a "class".   
+   rather than to a "class".  E.g. if there were a module of "foo.bar", it's
+   common to attach a method to it:
+   ```js
+   foo.bar.baz = function(){...}
+   ```
+   In Haxe, this isn't possible.  Hxtern converts the last module into a
+   "virtual" class, and attaches the method to that instead:
 
+   ```haxe
+   package foo;
+   @:native("foo.bar");
+   class Bar {
+      public static function baz(){...}
+   }
+   ```
+   If there's already a Bar class in the js file, then the process will fail.
+
+-  Hxtern tries to convert js types and jsdoc tags to Haxe equivalents.
+   Here's an (incomplete) list:
+   ```
+      boolean  -> Bool;
+      string   -> String;
+      Array    -> Array;
+      number   -> Float;
+      Object   -> Dynamic;
+      Function -> Dynamic;
+      void     -> Void;
+   ```
+   Further transformations are possible depending on type details... e.g. 
+   Object<string, number> will get translated to Map<String,Float>.
 
 ## TODO
 
