@@ -1,15 +1,10 @@
 jsdoc3-hxtern
 ============
 
-a jsdoc3 plugin for generating haxe externs
 
-[Jsdoc](http://usejsdoc.org/) is a popular documentation generator for
-javascript.  Google uses a special version of jsdoc for its [closure
-compiler](https://developers.google.com/closure/compiler/docs/js-for-compiler).
-The extended documentation tags enable more specific typing information for
-callback arguments, etc.
-
-
+Jsdoc3-hxtern is a [Jsdoc](http://usejsdoc.org/) plugin that uses extended  [closure
+compiler annotations](https://developers.google.com/closure/compiler/docs/js-for-compiler).
+in order to generate [Haxe externs](http://haxe.org/doc/js/extern_libraries).
 
 It's currently in an incomplete alpha state.
 
@@ -34,7 +29,7 @@ are still several situations that require special handling.
 
    ```haxe
    package foo;
-   @:native("foo.bar");
+   @:native("foo.bar")
    class Bar {
       public static function baz(){...}
    }
