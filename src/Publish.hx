@@ -222,8 +222,12 @@ class Publish {
             case NullableLiteral(type) : return 'Dynamic';
             case TypeApplication(type) : {
                 var container = renderType(type.expression);
-                if (container == "Dynamic" && type.applications.length > 1){
-                    container = "Map";
+                if (container == "Dynamic" && type.applications.length == 2){
+                    var type1 = renderType(type.applications[0]);
+                    if (type1 == 'String') type.applications.shift();
+                }
+                if (container == "Dynamic" && type.applications.length != 1){
+                    throw 'too many type Dynamic parameters for $type';
                 }
                 var params = [for (a in type.applications) renderType(a)].join(', ');
                 return '$container<$params>';
@@ -255,7 +259,6 @@ class Publish {
            var package_line = 'package ${pack.name};';
            var native = '';
            if (clazz.native != null) {
-               trace(clazz.name);
                native = '@:native("${clazz.native}")';
            }
            if (clazz.pname != null){
