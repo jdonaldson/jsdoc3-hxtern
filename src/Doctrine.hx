@@ -70,6 +70,11 @@ typedef FieldType = {
     value : UnknownType
 }
 
+typedef RestType = {
+    >UnknownType,
+    expression : UnknownType 
+}
+
 typedef RecordType = {
     >UnknownType,
     fields : Array<UnknownType>
@@ -101,6 +106,7 @@ class DoctrineHelper {
             case "UndefinedLiteral" : return UndefinedLiteral (cast type);
             case "UnionType"        : return UnionType        (cast type);
             case "VoidLiteral"      : return VoidLiteral      (cast type);
+            case "RestType"         : return RestType         (cast type);
             default                 : throw 'error! $type is an unknown doctrine type.';
         }
     }
@@ -140,4 +146,5 @@ enum DoctrineType {
     UnionType        ( type : UnionType);
     Unknown          ( type : UnknownType);
     VoidLiteral      ( type : VoidLiteral);
+    RestType         ( type : RestType);
 }
