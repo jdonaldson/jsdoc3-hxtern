@@ -68,6 +68,10 @@ are still several situations that require special handling.
 - Hxtern will change the name of callback arguments to avoid using haxe
   keywords.  It will prepend a '\_' character to arguments named "callback".
 
+- Haxe does not have a traditional ellipses operator for arguments (e.g. a 
+  function that accepts an arbitrary number of arguments.  When Hxtern
+  encounters one of these it will generate 6 optional arguments in its place.
+
 ## TODO
 
 - handle @extends
