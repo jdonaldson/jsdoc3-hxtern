@@ -29,7 +29,7 @@ information there using a special closure compiler-comaptible parser called
 After doclets are extracted and type information gathered from doctrine, there
 are still several situations that require special handling.  
  
-1.  It's typical to have static methods attached to "modules" in javascript,
+1. It's typical to have static methods attached to "modules" in javascript,
    rather than to a "class".  E.g. if there were a module of "foo.bar", it's
    you might see a method defined like this:
    ```js
@@ -51,7 +51,7 @@ are still several situations that require special handling.
    problems.  however, If there's already an *additional* Bar class in the js 
    file, then the process will fail.
 
-2.  Hxtern tries to convert js types and jsdoc tags to Haxe equivalents.
+2. Hxtern tries to convert js types and jsdoc tags to Haxe equivalents.
    Here's an (incomplete) list:
    ```
       boolean  -> Bool;
@@ -66,11 +66,15 @@ are still several situations that require special handling.
    Object<string, number> will get translated to Map<String,Float>.
 
 3. Hxtern will change the name of callback arguments to avoid using haxe
-  keywords.  It will prepend a '\_' character to arguments named "callback".
+   keywords.  It will prepend a '\_' character to arguments named "callback".
 
 4. Haxe does not have a traditional ellipses operator for arguments (e.g. a 
-  function that accepts an arbitrary number of arguments.  When Hxtern
-  encounters one of these it will generate 6 optional arguments in its place.
+   function that accepts an arbitrary number of arguments.  When Hxtern
+   encounters one of these it will generate 6 optional arguments in its place.
+
+5. Haxe does not have "union types" that are sometimes used to describe the
+   arguments of a method (either a string or an int).  Currently, the plugin
+   just generates a type signature for the first possible type that exists.
 
 ## TODO
 
