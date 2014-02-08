@@ -64,6 +64,9 @@ are still several situations that require special handling.
    Further transformations are possible depending on type details... e.g. 
    Object<string, number> will get translated to Map<String,Float>.
 
+- Hxtern will change the name of callback arguments to avoid using haxe
+  keywords.  It will prepend a '\_' character to arguments named "callback".
+
 ## TODO
 
 - handle @extends
