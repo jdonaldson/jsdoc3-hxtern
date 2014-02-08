@@ -30,12 +30,14 @@ are still several situations that require special handling.
  
 -  It's typical to have static methods attached to "modules" in javascript,
    rather than to a "class".  E.g. if there were a module of "foo.bar", it's
-   common to attach a method to it:
+   you might see a method defined like this:
    ```js
    foo.bar.baz = function(){...}
    ```
-   In Haxe, this isn't possible.  Hxtern converts the last module into a
-   "virtual" class, and attaches the method to that instead:
+   In Haxe, this isn't possible.  Haxe requires that you define methods only on 
+   classes.  And classes must be upper case.  To work around this problem, 
+   Hxtern converts the last module into an "alias" class, and attaches the 
+   method to that instead:
 
    ```haxe
    package foo;
@@ -44,7 +46,9 @@ are still several situations that require special handling.
       public static function baz(){...}
    }
    ```
-   If there's already a Bar class in the js file, then the process will fail.
+   The upper class alias can coexist along side the lower class module with no
+   problems.  however, If there's already an *additional* Bar class in the js 
+   file, then the process will fail.
 
 -  Hxtern tries to convert js types and jsdoc tags to Haxe equivalents.
    Here's an (incomplete) list:
