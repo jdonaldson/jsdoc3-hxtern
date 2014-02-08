@@ -348,7 +348,11 @@ Publish.renderType = function(type) {
 	case 10:
 		var type1 = $e[2];
 		var container = Publish.renderType(type1.expression);
-		if(container == "Dynamic" && type1.applications.length > 1) container = "Map";
+		if(container == "Dynamic" && type1.applications.length == 2) {
+			var type11 = Publish.renderType(type1.applications[0]);
+			if(type11 == "String") type1.applications.shift();
+		}
+		if(container == "Dynamic" && type1.applications.length != 1) throw "too many type Dynamic parameters for " + Std.string(type1);
 		var params = ((function($this) {
 			var $r;
 			var _g1 = [];
@@ -398,10 +402,7 @@ Publish.render = function(pack,cwd) {
 		var clazz_name = clazz.name;
 		var package_line = "package " + pack.name + ";";
 		var $native = "";
-		if(clazz["native"] != null) {
-			console.log(clazz.name);
-			$native = "@:native(\"" + clazz["native"] + "\")";
-		}
+		if(clazz["native"] != null) $native = "@:native(\"" + clazz["native"] + "\")";
 		if(clazz.pname != null) {
 			clazz_name = clazz.pname;
 			package_line = "";
