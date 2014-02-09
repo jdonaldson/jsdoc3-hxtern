@@ -258,7 +258,8 @@ class Publish {
                     if (type1 == 'String') type.applications.shift();
                 }
                 if (container == "Dynamic" && type.applications.length != 1){
-                    throw 'too many type Dynamic parameters for $type';
+                    trace('Too many parameters for $type.  Using "Dynamic"\n');
+                    return 'Dynamic';
                 }
                 var params = [for (a in type.applications) renderType(a)].join(', ');
                 return '$container<$params>';

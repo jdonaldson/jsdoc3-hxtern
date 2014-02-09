@@ -402,7 +402,10 @@ Publish.renderType = function(type) {
 			var type11 = Publish.renderType(type1.applications[0]);
 			if(type11 == "String") type1.applications.shift();
 		}
-		if(container == "Dynamic" && type1.applications.length != 1) throw "too many type Dynamic parameters for " + Std.string(type1);
+		if(container == "Dynamic" && type1.applications.length != 1) {
+			console.log("Too many parameters for " + Std.string(type1) + ".  Using \"Dynamic\"\n");
+			return "Dynamic";
+		}
 		var params = ((function($this) {
 			var $r;
 			var _g1 = [];
