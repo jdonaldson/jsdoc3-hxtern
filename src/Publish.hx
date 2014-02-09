@@ -247,7 +247,7 @@ class Publish {
                 } else if (count > 6){
                     throw "Too many types in union type $type";
                 } else {
-                    return 'Any$count<$types>';
+                    return 'hxtern.Any$count<$types>';
                 }
             }
             case NullableLiteral(type) : return 'Dynamic';

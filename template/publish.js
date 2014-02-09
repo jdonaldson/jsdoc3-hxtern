@@ -390,7 +390,7 @@ Publish.renderType = function(type) {
 			return $r;
 		}(this))).join(",");
 		var count = type1.elements.length;
-		if(count == 0) throw "No types in uniontype for $type"; else if(count == 1) return Publish.renderType(type1.elements[0]); else if(count > 6) throw "Too many types in union type $type"; else return "Any" + count + "<" + types + ">";
+		if(count == 0) throw "No types in uniontype for $type"; else if(count == 1) return Publish.renderType(type1.elements[0]); else if(count > 6) throw "Too many types in union type $type"; else return "hxtern.Any" + count + "<" + types + ">";
 		break;
 	case 7:
 		var type1 = $e[2];
