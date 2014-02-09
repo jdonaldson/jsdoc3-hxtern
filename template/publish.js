@@ -195,7 +195,7 @@ Publish.main = function() {
 			case 1:
 				var doc = $e[2];
 				if(doc.memberof == null) {
-					console.log("" + Std.string(doc.name) + " is a member with no \"memberof\" field.  This can happen if it is meant to be a module.  Ignoring it for now");
+					console.log("INFO: " + Std.string(doc.name) + " is a member with no \"memberof\" field.  This can happen if it is meant to be a module.  Ignoring it for now");
 					return;
 				}
 				var p = require('doctrine').parse(x.comment,{ unwrap : true});
@@ -375,7 +375,23 @@ Publish.renderType = function(type) {
 		return "Dynamic";
 	case 13:
 		var type1 = $e[2];
-		return "Dynamic";
+		var types = ((function($this) {
+			var $r;
+			var _g1 = [];
+			{
+				var _g2 = 0, _g3 = type1.elements;
+				while(_g2 < _g3.length) {
+					var e = _g3[_g2];
+					++_g2;
+					_g1.push(Publish.renderType(e));
+				}
+			}
+			$r = _g1;
+			return $r;
+		}(this))).join(",");
+		var count = type1.elements.length;
+		if(count == 0) throw "No types in uniontype for $type"; else if(count == 1) return Publish.renderType(type1.elements[0]); else if(count > 6) throw "Too many types in union type $type"; else return "Any" + count + "<" + types + ">";
+		break;
 	case 7:
 		var type1 = $e[2];
 		return "Dynamic";

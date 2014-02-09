@@ -89,7 +89,7 @@ class Publish {
                     }
                     case DocletMember(doc) : {
                         if (doc.memberof == null) {
-                            trace('${doc.name} is a member with no "memberof" field.  This can happen if it is meant to be a module.  Ignoring it for now');
+                            trace('INFO: ${doc.name} is a member with no "memberof" field.  This can happen if it is meant to be a module.  Ignoring it for now');
                             return;
                         }
                         var p = Doctrine.parse(x.comment, {unwrap:true});
@@ -238,7 +238,17 @@ class Publish {
             case AllLiteral(type)  : return 'Dynamic'; 
             case UnionType(type)   : {
                 // return renderType(type.elements[0]);
-                return 'Dynamic';
+                var types = [for (e in type.elements) renderType(e)].join(',');
+                var count = type.elements.length;
+                if (count == 0){
+                    throw "No types in uniontype for $type";
+                } else if (count == 1){
+                    return renderType(type.elements[0]);
+                } else if (count > 6){
+                    throw "Too many types in union type $type";
+                } else {
+                    return 'Any$count<$types>';
+                }
             }
             case NullableLiteral(type) : return 'Dynamic';
             case TypeApplication(type) : {
