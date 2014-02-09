@@ -363,7 +363,7 @@ Publish.renderType = function(type) {
 		return "" + type1.key + ": " + value;
 	case 12:
 		var type1 = $e[2];
-		return "";
+		return "Null<Dynamic>";
 	case 4:
 		var type1 = $e[2];
 		return Publish.nameExpressionType(type1.name);

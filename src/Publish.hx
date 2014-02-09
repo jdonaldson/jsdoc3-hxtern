@@ -230,7 +230,7 @@ class Publish {
                 var value = renderType(type.value);
                 return '${type.key}: $value';
             }
-            case UndefinedLiteral(type) : { return ''; }
+            case UndefinedLiteral(type) :  return 'Null<Dynamic>';
             case NameExpression(type) : {
                 return nameExpressionType(type.name);
             }
@@ -276,7 +276,6 @@ class Publish {
             case RestType(type) : {
                 var resttype = renderType(type.expression);
                 return [for (i in 0...6) '?$resttype'].join('->'); 
-                // return [for (i in 0...6) '_opt$i
             }
             case _ : throw 'unknown type in renderType: $type';
         }
