@@ -1,5 +1,5 @@
 /**
-  Datatypes and helpers for jsdoc3 doclets
+  Typedefs and helpers for jsdoc3 doclets
  **/
 
 /**
@@ -33,6 +33,7 @@ typedef DocletMemberBase = {
     scope      : String, // static, instance, global
     ?access    : String, // private
 }
+
 typedef DocletMember = {
     > DocletMemberBase,
     type : { names : Array<String>},
@@ -44,7 +45,7 @@ typedef DocletFunction = {
 }
 
 /**
-  These can be simple aliases, no extra info
+  These can be simple aliases, no additional specific info.
  **/
 typedef DocletClass    = DocletMember;
 typedef DocletConstant = DocletMemberBase;
@@ -143,27 +144,3 @@ typedef FunctionParam = {
     name          : String
 }
 
-
-// Unused
-
-// enum HaxeType {
-//     HaxeConstructor    (args : HaxeBase<DocletFunction>);
-//     HaxeInstanceField  (args : HaxeMember<DocletMember>);
-//     HaxeStaticField    (args : HaxeMember<DocletMember> );
-//     HaxeInstanceMethod (args : HaxeFunction<DocletFunction> );
-//     HaxeStaticMethod   (args : HaxeFunction<DocletFunction> );
-//     NoOp;
-// }
-
-// typedef HaxeBase<DocType> = {
-//     clazz : Clazz,
-//     doc : DocType,
-//     signature : String,
-// }
-
-// typedef HaxeMember<DocType> = {
-//     >HaxeBase<DocType>,
-//     name : String
-// }
-
-// typedef HaxeFunction<DocType> = HaxeMember<DocType>;

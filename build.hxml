@@ -1,5 +1,5 @@
 -cp src
 -main Publish
 -js template/publish.js
--cmd jsdoc -t template ~/Projects/hxtern/ext/closure-compiler/contrib/externs/api/gadgets/google.container.js 2> error.log
+-cmd jsdoc -t template ~/Projects/hxtern/ext/closure-compiler/contrib/externs/api/gadgets/iframes.js
 

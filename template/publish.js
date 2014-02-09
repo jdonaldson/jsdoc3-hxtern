@@ -76,27 +76,30 @@ DoctrineHelper.chooseType = function(type) {
 		return DoctrineType.VoidLiteral(type);
 	case "RestType":
 		return DoctrineType.RestType(type);
+	case "ArrayType":
+		return DoctrineType.ArrayType(type);
 	default:
 		throw "error! " + Std.string(type) + " is an unknown doctrine type.";
 	}
 }
-var DoctrineType = { __ename__ : true, __constructs__ : ["AllLiteral","FieldType","FunctionType","NameExpression","NonNullableType","NullLiteral","NullableLiteral","NullableType","OptionalType","RecordType","TypeApplication","UndefinedLiteral","UnionType","Unknown","VoidLiteral","RestType"] }
-DoctrineType.AllLiteral = function(type) { var $x = ["AllLiteral",0,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
-DoctrineType.FieldType = function(type) { var $x = ["FieldType",1,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
-DoctrineType.FunctionType = function(type) { var $x = ["FunctionType",2,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
-DoctrineType.NameExpression = function(type) { var $x = ["NameExpression",3,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
-DoctrineType.NonNullableType = function(type) { var $x = ["NonNullableType",4,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
-DoctrineType.NullLiteral = function(type) { var $x = ["NullLiteral",5,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
-DoctrineType.NullableLiteral = function(type) { var $x = ["NullableLiteral",6,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
-DoctrineType.NullableType = function(type) { var $x = ["NullableType",7,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
-DoctrineType.OptionalType = function(type) { var $x = ["OptionalType",8,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
-DoctrineType.RecordType = function(type) { var $x = ["RecordType",9,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
-DoctrineType.TypeApplication = function(type) { var $x = ["TypeApplication",10,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
-DoctrineType.UndefinedLiteral = function(type) { var $x = ["UndefinedLiteral",11,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
-DoctrineType.UnionType = function(type) { var $x = ["UnionType",12,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
-DoctrineType.Unknown = function(type) { var $x = ["Unknown",13,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
-DoctrineType.VoidLiteral = function(type) { var $x = ["VoidLiteral",14,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
-DoctrineType.RestType = function(type) { var $x = ["RestType",15,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+var DoctrineType = { __ename__ : true, __constructs__ : ["ArrayType","AllLiteral","FieldType","FunctionType","NameExpression","NonNullableType","NullLiteral","NullableLiteral","NullableType","OptionalType","RecordType","TypeApplication","UndefinedLiteral","UnionType","Unknown","VoidLiteral","RestType"] }
+DoctrineType.ArrayType = function(type) { var $x = ["ArrayType",0,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.AllLiteral = function(type) { var $x = ["AllLiteral",1,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.FieldType = function(type) { var $x = ["FieldType",2,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.FunctionType = function(type) { var $x = ["FunctionType",3,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.NameExpression = function(type) { var $x = ["NameExpression",4,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.NonNullableType = function(type) { var $x = ["NonNullableType",5,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.NullLiteral = function(type) { var $x = ["NullLiteral",6,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.NullableLiteral = function(type) { var $x = ["NullableLiteral",7,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.NullableType = function(type) { var $x = ["NullableType",8,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.OptionalType = function(type) { var $x = ["OptionalType",9,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.RecordType = function(type) { var $x = ["RecordType",10,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.TypeApplication = function(type) { var $x = ["TypeApplication",11,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.UndefinedLiteral = function(type) { var $x = ["UndefinedLiteral",12,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.UnionType = function(type) { var $x = ["UnionType",13,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.Unknown = function(type) { var $x = ["Unknown",14,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.VoidLiteral = function(type) { var $x = ["VoidLiteral",15,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
+DoctrineType.RestType = function(type) { var $x = ["RestType",16,type]; $x.__enum__ = DoctrineType; $x.toString = $estr; return $x; }
 var EReg = function(r,opt) {
 	opt = opt.split("u").join("");
 	this.r = new RegExp(r,opt);
@@ -153,15 +156,13 @@ Publish.main = function() {
 						var _g3 = DoctrineHelper.chooseType(t.type);
 						var $e = (_g3);
 						switch( $e[1] ) {
-						case 15:
+						case 16:
 							var type = $e[2];
 							var _g4 = 0;
 							while(_g4 < 6) {
 								var i = _g4++;
 								params.push("?_opt" + i + ": " + Publish.renderType(type.expression));
 							}
-							console.log(params);
-							console.log(doc.memberof);
 							break;
 						default:
 							var optional = "";
@@ -174,10 +175,10 @@ Publish.main = function() {
 				if(is_constructor) {
 					var cls_pack = doc.memberof + "." + Std.string(doc.name);
 					var sig = "\tpublic function new(" + param_list + ");";
-					var clazz = Publish.makeClazz(cls_pack);
+					var clazz = Publish.makeClazz(cls_pack,doc);
 					clazz.fields.push(sig);
 				} else {
-					var clazz = Publish.makeClazz(doc.memberof);
+					var clazz = Publish.makeClazz(doc.memberof,doc);
 					var args = { name : doc.name, clazz : clazz, doc : doc, signature : ""};
 					switch(doc.scope) {
 					case "instance":
@@ -193,8 +194,12 @@ Publish.main = function() {
 				break;
 			case 1:
 				var doc = $e[2];
+				if(doc.memberof == null) {
+					console.log("" + Std.string(doc.name) + " is a member with no \"memberof\" field.  This can happen if it is meant to be a module.  Ignoring it for now");
+					return;
+				}
 				var p = require('doctrine').parse(x.comment,{ unwrap : true});
-				var clazz = Publish.makeClazz(doc.memberof);
+				var clazz = Publish.makeClazz(doc.memberof,doc);
 				var args = { name : doc.name, clazz : clazz, doc : doc, signature : ""};
 				var type = "Dynamic";
 				var _g1 = 0, _g2 = p.tags;
@@ -232,7 +237,7 @@ Publish.main = function() {
 						params.push("" + optional + Publish.keywordDodge(t.name) + ": " + Publish.renderType(t.type));
 					} else if(t.title == "return") ret = Publish.renderType(t.type);
 				}
-				var clazz = Publish.makeClazz(name);
+				var clazz = Publish.makeClazz(name,doc);
 				var param_list = params.join(", ");
 				clazz.comment = "" + Std.string(x.name) + " : generated by hxtern";
 				if(x.description != null) clazz.comment += "\n" + x.description;
@@ -240,7 +245,7 @@ Publish.main = function() {
 					var cls_pack = doc.name;
 					if(doc.memberof != null) cls_pack = doc.memberof + "." + Std.string(doc.name);
 					var sig = "\tpublic function new(" + param_list + ");";
-					var clazz1 = Publish.makeClazz(cls_pack);
+					var clazz1 = Publish.makeClazz(cls_pack,doc);
 					clazz1.fields.push(sig);
 				}
 				break;
@@ -257,7 +262,7 @@ Publish.main = function() {
 					if(t.title == "typedef") td = Publish.renderType(t.type);
 				}
 				if(td == "") td = "{}";
-				var clazz = Publish.makeClazz(name,true);
+				var clazz = Publish.makeClazz(name,doc,true);
 				clazz.fields = [td];
 				break;
 			case 7:
@@ -275,7 +280,7 @@ Publish.isOptional = function(type) {
 	var _g = DoctrineHelper.chooseType(type);
 	var $e = (_g);
 	switch( $e[1] ) {
-	case 8:
+	case 9:
 		var doc = $e[2];
 		return true;
 	default:
@@ -286,7 +291,7 @@ Publish.isRestArgument = function(arg) {
 	var _g = DoctrineHelper.chooseType(arg);
 	var $e = (_g);
 	switch( $e[1] ) {
-	case 15:
+	case 16:
 		var doc = $e[2];
 		return true;
 	default:
@@ -305,7 +310,7 @@ Publish.renderType = function(type) {
 	var _g = DoctrineHelper.chooseType(type);
 	var $e = (_g);
 	switch( $e[1] ) {
-	case 2:
+	case 3:
 		var type1 = $e[2];
 		var params = ((function($this) {
 			var $r;
@@ -325,16 +330,16 @@ Publish.renderType = function(type) {
 		if(type1.result != null) result = Publish.renderType(type1.result);
 		if(params == "") params = "Void";
 		return "" + params + "->" + result;
+	case 9:
+		var type1 = $e[2];
+		return Publish.renderType(type1.expression);
+	case 5:
+		var type1 = $e[2];
+		return Publish.renderType(type1.expression);
 	case 8:
 		var type1 = $e[2];
 		return Publish.renderType(type1.expression);
-	case 4:
-		var type1 = $e[2];
-		return Publish.renderType(type1.expression);
-	case 7:
-		var type1 = $e[2];
-		return Publish.renderType(type1.expression);
-	case 9:
+	case 10:
 		var type1 = $e[2];
 		var fields = ((function($this) {
 			var $r;
@@ -352,29 +357,29 @@ Publish.renderType = function(type) {
 		}(this))).join(", ");
 		var res = "{" + fields + "}";
 		return res;
-	case 1:
+	case 2:
 		var type1 = $e[2];
 		var value = Publish.renderType(type1.value);
 		return "" + type1.key + ": " + value;
-	case 11:
-		var type1 = $e[2];
-		return "";
-	case 3:
-		var type1 = $e[2];
-		return Publish.nameExpressionType(type1.name);
-	case 14:
-		var type1 = $e[2];
-		return "Void";
-	case 0:
-		var type1 = $e[2];
-		return "Dynamic";
 	case 12:
 		var type1 = $e[2];
-		return Publish.renderType(type1.elements[0]);
-	case 6:
+		return "";
+	case 4:
+		var type1 = $e[2];
+		return Publish.nameExpressionType(type1.name);
+	case 15:
+		var type1 = $e[2];
+		return "Void";
+	case 1:
 		var type1 = $e[2];
 		return "Dynamic";
-	case 10:
+	case 13:
+		var type1 = $e[2];
+		return "Dynamic";
+	case 7:
+		var type1 = $e[2];
+		return "Dynamic";
+	case 11:
 		var type1 = $e[2];
 		var container = Publish.renderType(type1.expression);
 		if(container == "Dynamic" && type1.applications.length == 2) {
@@ -397,6 +402,32 @@ Publish.renderType = function(type) {
 			return $r;
 		}(this))).join(", ");
 		return "" + container + "<" + params + ">";
+	case 0:
+		var type1 = $e[2];
+		if(type1.elements.length > 1) {
+			console.log("Too many array type elements in " + Std.string(type1));
+			return "Dynamic";
+		} else {
+			var firstType = Publish.renderType(type1.elements[0]);
+			return "Array<" + firstType + ">";
+		}
+		break;
+	case 16:
+		var type1 = $e[2];
+		var resttype = Publish.renderType(type1.expression);
+		return ((function($this) {
+			var $r;
+			var _g1 = [];
+			{
+				var _g2 = 0;
+				while(_g2 < 6) {
+					var i = _g2++;
+					_g1.push("?" + resttype);
+				}
+			}
+			$r = _g1;
+			return $r;
+		}(this))).join("->");
 	default:
 		throw "unknown type in renderType: " + Std.string(type);
 	}
@@ -473,8 +504,9 @@ Publish.extractPacks = function(pack) {
 	}
 	return cur_obj;
 }
-Publish.makeClazz = function(memberof,is_typedef) {
+Publish.makeClazz = function(memberof,doclet,is_typedef) {
 	if(is_typedef == null) is_typedef = false;
+	if(memberof == null) console.log(doclet);
 	var packs = memberof.split(".");
 	var cls = packs.pop();
 	var pname = null;

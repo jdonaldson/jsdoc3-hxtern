@@ -48,10 +48,13 @@ typedef OptionalType = {
     expression : UnknownType
 }
 
-typedef UnionType = {
+typedef MultiType = {
     > UnknownType,
     elements : Array<UnknownType>
 }
+
+typedef ArrayType = MultiType;
+typedef UnionType = MultiType;
 
 typedef NonNullableType = {
     > UnknownType,
@@ -107,6 +110,7 @@ class DoctrineHelper {
             case "UnionType"        : return UnionType        (cast type);
             case "VoidLiteral"      : return VoidLiteral      (cast type);
             case "RestType"         : return RestType         (cast type);
+            case "ArrayType"        : return ArrayType        (cast type);
             default                 : throw 'error! $type is an unknown doctrine type.';
         }
     }
@@ -118,7 +122,6 @@ class DoctrineHelper {
             // UndefinedLiteral: 'UndefinedLiteral',
             // VoidLiteral: 'VoidLiteral',
             // UnionType: 'UnionType',
-            // ArrayType: 'ArrayType',
             // RecordType: 'RecordType',
             // FieldType: 'FieldType',
             // FunctionType: 'FunctionType',
@@ -131,6 +134,7 @@ class DoctrineHelper {
             // TypeApplication: 'TypeApplication'
 
 enum DoctrineType {
+    ArrayType        ( type : ArrayType);
     AllLiteral       ( type : AllLiteral);
     FieldType        ( type : FieldType);
     FunctionType     ( type : FunctionType);

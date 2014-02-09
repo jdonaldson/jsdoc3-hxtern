@@ -74,7 +74,7 @@ are still several situations that require special handling.
 
 5. Haxe does not have "union types" that are sometimes used to describe the
    arguments of a method (either a string or an int).  Currently, the plugin
-   just generates a type signature for the first possible type that exists.
+   just treats these as "Dynamic" types.
 
 ## TODO
 
