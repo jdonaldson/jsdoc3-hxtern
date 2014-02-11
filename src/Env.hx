@@ -4,8 +4,8 @@
  **/
 @:native("env")
 extern class Env {
-     static public var conf : EnvConf;
-     static public var opts : EnvOpts; 
+     static public var conf  : EnvConf;
+     static public var opts  : EnvOpts;
 }
 
 /**
@@ -16,7 +16,8 @@ typedef EnvConf = {
 }
 
 typedef EnvOpts = {
-    _ : String,
-    destination : String,
-    encoding : String
+    _                       : String,
+    destination             : String,
+    encoding                : String,
+    query : Dynamic
 }

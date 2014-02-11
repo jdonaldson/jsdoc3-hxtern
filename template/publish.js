@@ -131,6 +131,8 @@ Publish.main = function() {
 	Publish.class_list = [];
 	Publish.pack_obj = { name : "", packs : new haxe.ds.StringMap(), classes : new haxe.ds.StringMap()};
 	var dest = env.opts.destination;
+	var query = env.opts.query;
+	if(query == null || query.global == null) throw "Must pass query parameter of global=<packname> for global class alias";
 	exports.publish = function(taffy,opts,tutorial) {
 		taffy.sort("longname, version, since");
 		taffy().each(function(x,y) {
@@ -144,10 +146,11 @@ Publish.main = function() {
 			switch( $e[1] ) {
 			case 2:
 				var doc = $e[2];
+				if(doc.memberof == null) doc.memberof = query.global + ".Global"; else if(doc.memberof == "Window") doc.memberof = query.global + ".Window";
 				var p = require('doctrine').parse(x.comment,{ unwrap : true});
-				var is_constructor = false;
 				var params = [];
 				var ret = "Void";
+				var is_constructor = false;
 				var _g1 = 0, _g2 = p.tags;
 				while(_g1 < _g2.length) {
 					var t = _g2[_g1];
@@ -525,7 +528,10 @@ Publish.extractPacks = function(pack) {
 }
 Publish.makeClazz = function(memberof,doclet,is_typedef) {
 	if(is_typedef == null) is_typedef = false;
-	if(memberof == null) console.log(doclet);
+	if(memberof == null) {
+		console.log(doclet);
+		throw "missing memberof for makeClazz";
+	}
 	var packs = memberof.split(".");
 	var cls = packs.pop();
 	var pname = null;
@@ -537,11 +543,12 @@ Publish.makeClazz = function(memberof,doclet,is_typedef) {
 	var type = is_typedef?"typedef":"class";
 	var clazz = Publish.lc(cls)?{ name : Publish.titleCase(cls), type : type, pack : pack, pname : pname, 'native' : memberof, fields : []}:{ name : cls, type : type, pname : pname, pack : pack, fields : []};
 	var cur_clazzes = clazz.pack.classes;
-	if(cur_clazzes.exists(clazz.name)) {
-		var cur_clazz = cur_clazzes.get(clazz.name);
+	var full_name = pack.name == null || pack.name == ""?pack.name + "." + clazz.name:clazz.name;
+	if(cur_clazzes.exists(full_name)) {
+		var cur_clazz = cur_clazzes.get(full_name);
 		if(cur_clazz["native"] != clazz["native"]) throw "Two different definitions for " + clazz.name + " : " + Std.string(clazz) + " and " + Std.string(cur_clazz);
 		clazz = cur_clazz;
-	} else cur_clazzes.set(clazz.name,clazz);
+	} else cur_clazzes.set(pack.name + "." + clazz.name,clazz);
 	return clazz;
 }
 Publish.lc = function(arg) {

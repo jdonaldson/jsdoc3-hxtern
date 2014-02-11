@@ -23,6 +23,10 @@ class Publish {
             classes : new Map<String, Clazz>()
         };
         var dest = Env.opts.destination;
+        var query = Env.opts.query;
+        if (query == null || query.global == null){
+            throw "Must pass query parameter of global=<packname> for global class alias";
+        }
         Exports.publish = function(taffy: Taffy, opts: PublishOpts, tutorial : Dynamic){
             taffy.sort("longname, version, since");
             taffy.retrieve().each(function(x,y){
@@ -33,10 +37,15 @@ class Publish {
                 }
                 switch(x.docletType()){
                     case DocletFunction(doc) : {
+                        if (doc.memberof == null){
+                            doc.memberof = query.global+'.Global'; 
+                        } else if (doc.memberof == "Window"){
+                            doc.memberof = query.global + ".Window";
+                        }
                         var p = Doctrine.parse(x.comment, {unwrap:true});
-                        var is_constructor = false;
                         var params = [];
                         var ret = 'Void';
+                        var is_constructor = false;
                         for (t in p.tags){
                             if (t.title == 'constructor' || t.title == 'interface'){
                                 is_constructor = true;
@@ -363,6 +372,7 @@ class Publish {
     public static function makeClazz(memberof : String, doclet : Doclet, is_typedef = false) : Clazz {
         if (memberof == null) {
             trace(doclet);
+            throw "missing memberof for makeClazz";
         }
         var packs = memberof.split('.');
         var cls = packs.pop();
@@ -393,14 +403,16 @@ class Publish {
             fields : []
         }
         var cur_clazzes = clazz.pack.classes;
-        if (cur_clazzes.exists(clazz.name)){
-            var cur_clazz = cur_clazzes.get(clazz.name);
+        var full_name = (pack.name == null || pack.name == '') ? pack.name + '.' + clazz.name : clazz.name;
+        
+        if (cur_clazzes.exists(full_name)){
+            var cur_clazz = cur_clazzes.get(full_name);
             if (cur_clazz.native != clazz.native){
                 throw ('Two different definitions for ${clazz.name} : $clazz and $cur_clazz');
             } 
             clazz = cur_clazz;
         } else {
-            cur_clazzes.set(clazz.name, clazz);
+            cur_clazzes.set(pack.name + '.' + clazz.name, clazz);
         }
         return clazz;
 
