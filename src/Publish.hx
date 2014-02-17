@@ -13,8 +13,174 @@ using Doclet.DocletHelper;
 using Doctrine.DoctrineHelper;
 
 class Publish {
-    static var pack_obj : Pack;
-    static var class_list : Array<String>;
+    static var pack_obj     : Pack;
+    static var class_list   : Array<String>;
+    static var global_alias : String;
+    static var dest         : String;
+    static function publish(taffy: Taffy, opts: PublishOpts, tutorial : Dynamic){
+        taffy.sort("longname, version, since");
+        taffy.retrieve().each(function(x,y){
+            var comment = '';
+            if (x.description != null && x.description.length > 0) {
+                var fixed_description = x.description.split('\n').join('\n\t  ');
+                comment = '\t/**\n\t  $fixed_description\n\t */\n';
+            }
+            switch(x.docletType()){
+                case DocletFunction(doc) : {
+                    if (doc.memberof == null){
+                        doc.memberof = global_alias + ".Global"; 
+                    } else if (doc.memberof == "Window"){
+                        doc.memberof = global_alias + ".Window";
+                    }
+                    var p = Doctrine.parse(x.comment, {unwrap: true});
+                    var params = [];
+                    var ret = 'Void';
+                    var is_constructor = false;
+                    for (t in p.tags){
+                        if (t.title == 'constructor' || t.title == 'interface'){
+                            is_constructor = true;
+                        } else if (t.title == 'param'){
+                            switch(t.type.chooseType()){
+                                case RestType(type) : {
+                                    for (i in 0...6){
+                                        params.push('?_opt$i: ${renderType(type.expression)}');
+                                    }
+                                }
+                                default : {
+                                    var optional = '';
+                                    if (isOptional(t.type)) optional = '?';
+                                    params.push('$optional${keywordDodge(t.name)}: ${renderType(t.type)}');
+                                }
+                            }
+
+                        } else if (t.title == 'return'){
+                            ret = renderType(t.type);
+                        }
+                    }
+                    var param_list = params.join(', ');
+
+                    if (is_constructor){
+                        var cls_pack = doc.memberof + '.' + doc.name;
+                        var sig = '\tpublic function new($param_list);';
+                        var clazz = makeClazz(cls_pack, doc);
+                        clazz.fields.push(sig);
+                    } else {
+                        var clazz = makeClazz(doc.memberof, doc);
+
+                        var args = {
+                            name      : doc.name,
+                            clazz     : clazz,
+                            doc       : doc,
+                            signature : ''
+                        };
+
+                        switch(doc.scope){
+                            case "instance" : {
+                                var sig = '\tpublic function ${doc.name}($param_list): $ret;';
+                                clazz.fields.push(sig);
+                            }
+                            case "static"   : {
+                                var sig = '\tpublic static function ${doc.name}($param_list): $ret;';
+                                clazz.fields.push(sig);
+                            }
+                        }
+                    }
+                }
+                case DocletMember(doc) : {
+                    if (doc.memberof == null) {
+                        trace('INFO: ${doc.name} is a member with no "memberof" field.  This can happen if it is meant to be a module.  Ignoring it for now');
+                        return;
+                    }
+                    var p = Doctrine.parse(x.comment, {unwrap:true});
+                    var clazz = makeClazz(doc.memberof, doc);
+                    var args = {
+                        name : doc.name,
+                        clazz : clazz ,
+                        doc : doc,
+                        signature : ''
+                    }
+                    var type = 'Dynamic';
+                    for (t in p.tags){
+                        if (t.title == 'type') {
+                            type = renderType(t.type);
+                        }
+                    }
+                    switch(doc.scope){
+                        case "instance" : {
+                            var sig = '${comment}\tpublic var ${doc.name}: $type;';
+                            clazz.fields.push(sig);
+                        }
+                        case "static" : {
+                            var sig = '${comment}\tpublic static var ${doc.name}: $type;';
+                            clazz.fields.push(sig);
+                        }
+                    }
+                }
+                case DocletClass(doc) : {
+                    var name = doc.name; 
+                    if (doc.memberof != null && doc.memberof.length > 0){
+                        name = doc.memberof + '.' + name;
+                    }
+                    var p = Doctrine.parse(x.comment, {unwrap:true});
+                    var is_constructor = false;
+                    var params = [];
+                    var ret = 'Void';
+                    for (t in p.tags){
+                        if (t.title == 'constructor' || t.title == 'interface'){
+                            is_constructor = true;
+                        } else if (t.title == 'param'){
+                            var optional = '';
+                            if (isOptional(t.type)) optional = '?';
+                            params.push('$optional${keywordDodge(t.name)}: ${renderType(t.type)}');
+
+                        } else if (t.title == 'return'){
+                            ret = renderType(t.type);
+                        }
+                    }
+                    var clazz = makeClazz(name, doc);
+                    var param_list = params.join(', ');
+                    clazz.comment = '${x.name} : generated by hxtern';
+                    if (x.description != null) clazz.comment += '\n${x.description}';
+                    if (is_constructor){
+                        var cls_pack = doc.name;
+                        if (doc.memberof != null){
+                            cls_pack = doc.memberof + '.' + doc.name;
+                        }
+                        var sig = '\tpublic function new($param_list);';
+
+                        var clazz = makeClazz(cls_pack, doc);
+                        clazz.fields.push(sig);
+                    }
+                }
+                case DocletTypedef(doc) : {
+                    var name = doc.name; 
+                    if (doc.memberof != null && doc.memberof.length > 0){
+                        name = doc.memberof + '.' + name;
+                    }
+                    var p = Doctrine.parse(x.comment, {unwrap:true});
+                    var td = '';
+                    for (t in p.tags){
+                        if (t.title == 'typedef'){
+                            td = renderType(t.type);
+                        }
+                    }
+                    if (td == '') td = '{}';
+                    var clazz = makeClazz(name, doc, true);
+                    clazz.fields = [td];
+
+                }
+                case DocletUnknown(_) : {
+                    throw('Unknown doclet type: ${x.kind}');
+                }
+                default : null; 
+            }
+        });
+        ensureDirectory(dest);
+        render(pack_obj, dest);
+        // var all_classes_content = class_list.join('\n');
+        // Fs.writeFileSync('all_classes.hxml', all_classes_content);
+    }
+
     static function main() {
         class_list = [];
         pack_obj = {
@@ -22,175 +188,13 @@ class Publish {
             packs   : new Map<String, Pack>(),
             classes : new Map<String, Clazz>()
         };
-        var dest = Env.opts.destination;
+        dest = Env.opts.destination;
         var query = Env.opts.query;
         if (query == null || query.global == null){
             throw "Must pass query parameter of global=<packname> for global class alias";
         }
-        Exports.publish = function(taffy: Taffy, opts: PublishOpts, tutorial : Dynamic){
-            taffy.sort("longname, version, since");
-            taffy.retrieve().each(function(x,y){
-                var comment = '';
-                if (x.description != null && x.description.length > 0) {
-                    var fixed_description = x.description.split('\n').join('\n\t  ');
-                    comment = '\t/**\n\t  $fixed_description\n\t */\n';
-                }
-                switch(x.docletType()){
-                    case DocletFunction(doc) : {
-                        if (doc.memberof == null){
-                            doc.memberof = query.global + ".Global"; 
-                        } else if (doc.memberof == "Window"){
-                            doc.memberof = query.global + ".Window";
-                        }
-                        var p = Doctrine.parse(x.comment, {unwrap: true});
-                        var params = [];
-                        var ret = 'Void';
-                        var is_constructor = false;
-                        for (t in p.tags){
-                            if (t.title == 'constructor' || t.title == 'interface'){
-                                is_constructor = true;
-                            } else if (t.title == 'param'){
-                                switch(t.type.chooseType()){
-                                    case RestType(type) : {
-                                        for (i in 0...6){
-                                            params.push('?_opt$i: ${renderType(type.expression)}');
-                                        }
-                                    }
-                                    default : {
-                                        var optional = '';
-                                        if (isOptional(t.type)) optional = '?';
-                                        params.push('$optional${keywordDodge(t.name)}: ${renderType(t.type)}');
-                                    }
-                                }
-
-                            } else if (t.title == 'return'){
-                                ret = renderType(t.type);
-                            }
-                        }
-                        var param_list = params.join(', ');
-
-                        if (is_constructor){
-                            var cls_pack = doc.memberof + '.' + doc.name;
-                            var sig = '\tpublic function new($param_list);';
-                            var clazz = makeClazz(cls_pack, doc);
-                            clazz.fields.push(sig);
-                        } else {
-                            var clazz = makeClazz(doc.memberof, doc);
-
-                            var args = {
-                                name      : doc.name,
-                                clazz     : clazz,
-                                doc       : doc,
-                                signature : ''
-                            };
-                            
-                            switch(doc.scope){
-                                case "instance" : {
-                                    var sig = '\tpublic function ${doc.name}($param_list): $ret;';
-                                    clazz.fields.push(sig);
-                                }
-                                case "static"   : {
-                                    var sig = '\tpublic static function ${doc.name}($param_list): $ret;';
-                                    clazz.fields.push(sig);
-                                }
-                            }
-                        }
-                    }
-                    case DocletMember(doc) : {
-                        if (doc.memberof == null) {
-                            trace('INFO: ${doc.name} is a member with no "memberof" field.  This can happen if it is meant to be a module.  Ignoring it for now');
-                            return;
-                        }
-                        var p = Doctrine.parse(x.comment, {unwrap:true});
-                        var clazz = makeClazz(doc.memberof, doc);
-                        var args = {
-                            name : doc.name,
-                            clazz : clazz ,
-                            doc : doc,
-                            signature : ''
-                        }
-                        var type = 'Dynamic';
-                        for (t in p.tags){
-                            if (t.title == 'type') {
-                                type = renderType(t.type);
-                            }
-                        }
-                        switch(doc.scope){
-                            case "instance" : {
-                                var sig = '${comment}\tpublic var ${doc.name}: $type;';
-                                clazz.fields.push(sig);
-                            }
-                            case "static" : {
-                                var sig = '${comment}\tpublic static var ${doc.name}: $type;';
-                                clazz.fields.push(sig);
-                            }
-                        }
-                    }
-                    case DocletClass(doc) : {
-                        var name = doc.name; 
-                        if (doc.memberof != null && doc.memberof.length > 0){
-                            name = doc.memberof + '.' + name;
-                        }
-                        var p = Doctrine.parse(x.comment, {unwrap:true});
-                        var is_constructor = false;
-                        var params = [];
-                        var ret = 'Void';
-                        for (t in p.tags){
-                            if (t.title == 'constructor' || t.title == 'interface'){
-                                is_constructor = true;
-                            } else if (t.title == 'param'){
-                                var optional = '';
-                                if (isOptional(t.type)) optional = '?';
-                                params.push('$optional${keywordDodge(t.name)}: ${renderType(t.type)}');
-
-                            } else if (t.title == 'return'){
-                                ret = renderType(t.type);
-                            }
-                        }
-                        var clazz = makeClazz(name, doc);
-                        var param_list = params.join(', ');
-                        clazz.comment = '${x.name} : generated by hxtern';
-                        if (x.description != null) clazz.comment += '\n${x.description}';
-                        if (is_constructor){
-                            var cls_pack = doc.name;
-                            if (doc.memberof != null){
-                                cls_pack = doc.memberof + '.' + doc.name;
-                            }
-                            var sig = '\tpublic function new($param_list);';
-
-                            var clazz = makeClazz(cls_pack, doc);
-                            clazz.fields.push(sig);
-                        }
-                    }
-                    case DocletTypedef(doc) : {
-                        var name = doc.name; 
-                        if (doc.memberof != null && doc.memberof.length > 0){
-                            name = doc.memberof + '.' + name;
-                        }
-                        var p = Doctrine.parse(x.comment, {unwrap:true});
-                        var td = '';
-                        for (t in p.tags){
-                            if (t.title == 'typedef'){
-                                td = renderType(t.type);
-                            }
-                        }
-                        if (td == '') td = '{}';
-                        var clazz = makeClazz(name, doc, true);
-                        clazz.fields = [td];
-
-                    }
-                    case DocletUnknown(_) : {
-                        throw('Unknown doclet type: ${x.kind}');
-                    }
-                    default : null; 
-                }
-            });
-            ensureDirectory(dest);
-            render(pack_obj, dest);
-            // var all_classes_content = class_list.join('\n');
-            // Fs.writeFileSync('all_classes.hxml', all_classes_content);
-        }
-        
+        global_alias = query.global;
+        Exports.publish = publish;
     }
     public static function isOptional(type : UnknownType) : Bool {
         switch(type.chooseType()){
