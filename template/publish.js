@@ -127,157 +127,156 @@ var IMap = function() { }
 IMap.__name__ = true;
 var Publish = function() { }
 Publish.__name__ = true;
-Publish.main = function() {
-	Publish.class_list = [];
-	Publish.pack_obj = { name : "", packs : new haxe.ds.StringMap(), classes : new haxe.ds.StringMap()};
-	var dest = env.opts.destination;
-	var query = env.opts.query;
-	if(query == null || query.global == null) throw "Must pass query parameter of global=<packname> for global class alias";
-	exports.publish = function(taffy,opts,tutorial) {
-		taffy.sort("longname, version, since");
-		taffy().each(function(x,y) {
-			var comment = "";
-			if(x.description != null && x.description.length > 0) {
-				var fixed_description = x.description.split("\n").join("\n\t  ");
-				comment = "\t/**\n\t  " + fixed_description + "\n\t */\n";
-			}
-			var _g = DocletHelper.docletType(x);
-			var $e = (_g);
-			switch( $e[1] ) {
-			case 2:
-				var doc = $e[2];
-				if(doc.memberof == null) doc.memberof = query.global + ".Global"; else if(doc.memberof == "Window") doc.memberof = query.global + ".Window";
-				var p = require('doctrine').parse(x.comment,{ unwrap : true});
-				var params = [];
-				var ret = "Void";
-				var is_constructor = false;
-				var _g1 = 0, _g2 = p.tags;
-				while(_g1 < _g2.length) {
-					var t = _g2[_g1];
-					++_g1;
-					if(t.title == "constructor" || t.title == "interface") is_constructor = true; else if(t.title == "param") {
-						var _g3 = DoctrineHelper.chooseType(t.type);
-						var $e = (_g3);
-						switch( $e[1] ) {
-						case 16:
-							var type = $e[2];
-							var _g4 = 0;
-							while(_g4 < 6) {
-								var i = _g4++;
-								params.push("?_opt" + i + ": " + Publish.renderType(type.expression));
-							}
-							break;
-						default:
-							var optional = "";
-							if(Publish.isOptional(t.type)) optional = "?";
-							params.push("" + optional + Publish.keywordDodge(t.name) + ": " + Publish.renderType(t.type));
+Publish.publish = function(taffy,opts,tutorial) {
+	taffy.sort("longname, version, since");
+	taffy().each(function(x,y) {
+		var comment = "";
+		if(x.description != null) comment = Publish.fixDescription(x.description);
+		var _g = DocletHelper.docletType(x);
+		var $e = (_g);
+		switch( $e[1] ) {
+		case 2:
+			var doc = $e[2];
+			if(doc.memberof == null) doc.memberof = Publish.global_alias + ".Global"; else if(doc.memberof == "Window") doc.memberof = Publish.global_alias + ".Window";
+			var p = require('doctrine').parse(x.comment,{ unwrap : true});
+			var params = [];
+			var ret = "Void";
+			var is_constructor = false;
+			var _g1 = 0, _g2 = p.tags;
+			while(_g1 < _g2.length) {
+				var t = _g2[_g1];
+				++_g1;
+				if(t.title == "constructor" || t.title == "interface") is_constructor = true; else if(t.title == "param") {
+					var _g3 = DoctrineHelper.chooseType(t.type);
+					var $e = (_g3);
+					switch( $e[1] ) {
+					case 16:
+						var type = $e[2];
+						var _g4 = 0;
+						while(_g4 < 6) {
+							var i = _g4++;
+							params.push("?_opt" + i + ": " + Publish.renderType(type.expression));
 						}
-					} else if(t.title == "return") ret = Publish.renderType(t.type);
-				}
-				var param_list = params.join(", ");
-				if(is_constructor) {
-					var cls_pack = doc.memberof + "." + Std.string(doc.name);
-					var sig = "\tpublic function new(" + param_list + ");";
-					var clazz = Publish.makeClazz(cls_pack,doc);
-					clazz.fields.push(sig);
-				} else {
-					var clazz = Publish.makeClazz(doc.memberof,doc);
-					var args = { name : doc.name, clazz : clazz, doc : doc, signature : ""};
-					switch(doc.scope) {
-					case "instance":
-						var sig = "\tpublic function " + Std.string(doc.name) + "(" + param_list + "): " + ret + ";";
-						clazz.fields.push(sig);
 						break;
-					case "static":
-						var sig = "\tpublic static function " + Std.string(doc.name) + "(" + param_list + "): " + ret + ";";
-						clazz.fields.push(sig);
-						break;
-					}
-				}
-				break;
-			case 1:
-				var doc = $e[2];
-				if(doc.memberof == null) {
-					console.log("INFO: " + Std.string(doc.name) + " is a member with no \"memberof\" field.  This can happen if it is meant to be a module.  Ignoring it for now");
-					return;
-				}
-				var p = require('doctrine').parse(x.comment,{ unwrap : true});
-				var clazz = Publish.makeClazz(doc.memberof,doc);
-				var args = { name : doc.name, clazz : clazz, doc : doc, signature : ""};
-				var type = "Dynamic";
-				var _g1 = 0, _g2 = p.tags;
-				while(_g1 < _g2.length) {
-					var t = _g2[_g1];
-					++_g1;
-					if(t.title == "type") type = Publish.renderType(t.type);
-				}
-				switch(doc.scope) {
-				case "instance":
-					var sig = "" + comment + "\tpublic var " + Std.string(doc.name) + ": " + type + ";";
-					clazz.fields.push(sig);
-					break;
-				case "static":
-					var sig = "" + comment + "\tpublic static var " + Std.string(doc.name) + ": " + type + ";";
-					clazz.fields.push(sig);
-					break;
-				}
-				break;
-			case 3:
-				var doc = $e[2];
-				var name = doc.name;
-				if(doc.memberof != null && doc.memberof.length > 0) name = doc.memberof + "." + name;
-				var p = require('doctrine').parse(x.comment,{ unwrap : true});
-				var is_constructor = false;
-				var params = [];
-				var ret = "Void";
-				var _g1 = 0, _g2 = p.tags;
-				while(_g1 < _g2.length) {
-					var t = _g2[_g1];
-					++_g1;
-					if(t.title == "constructor" || t.title == "interface") is_constructor = true; else if(t.title == "param") {
+					default:
 						var optional = "";
 						if(Publish.isOptional(t.type)) optional = "?";
 						params.push("" + optional + Publish.keywordDodge(t.name) + ": " + Publish.renderType(t.type));
-					} else if(t.title == "return") ret = Publish.renderType(t.type);
-				}
-				var clazz = Publish.makeClazz(name,doc);
-				var param_list = params.join(", ");
-				clazz.comment = "" + Std.string(x.name) + " : generated by hxtern";
-				if(x.description != null) clazz.comment += "\n" + x.description;
-				if(is_constructor) {
-					var cls_pack = doc.name;
-					if(doc.memberof != null) cls_pack = doc.memberof + "." + Std.string(doc.name);
-					var sig = "\tpublic function new(" + param_list + ");";
-					var clazz1 = Publish.makeClazz(cls_pack,doc);
-					clazz1.fields.push(sig);
-				}
-				break;
-			case 5:
-				var doc = $e[2];
-				var name = doc.name;
-				if(doc.memberof != null && doc.memberof.length > 0) name = doc.memberof + "." + name;
-				var p = require('doctrine').parse(x.comment,{ unwrap : true});
-				var td = "";
-				var _g1 = 0, _g2 = p.tags;
-				while(_g1 < _g2.length) {
-					var t = _g2[_g1];
-					++_g1;
-					if(t.title == "typedef") td = Publish.renderType(t.type);
-				}
-				if(td == "") td = "{}";
-				var clazz = Publish.makeClazz(name,doc,true);
-				clazz.fields = [td];
-				break;
-			case 7:
-				throw "Unknown doclet type: " + x.kind;
-				break;
-			default:
-				null;
+					}
+				} else if(t.title == "return") ret = Publish.renderType(t.type);
 			}
-		});
-		Publish.ensureDirectory(dest);
-		Publish.render(Publish.pack_obj,dest);
-	};
+			var param_list = params.join(", ");
+			if(is_constructor) {
+				var cls_pack = doc.memberof + "." + Std.string(doc.name);
+				var sig = "\tpublic function new(" + param_list + ");";
+				var clazz = Publish.makeClazz(cls_pack,doc);
+				clazz.fields.push(sig);
+			} else {
+				var clazz = Publish.makeClazz(doc.memberof,doc);
+				var args = { name : doc.name, clazz : clazz, doc : doc, signature : ""};
+				switch(doc.scope) {
+				case "instance":
+					var sig = "\tpublic function " + Std.string(doc.name) + "(" + param_list + "): " + ret + ";";
+					clazz.fields.push(sig);
+					break;
+				case "static":case "global":
+					var sig = "\tpublic static function " + Std.string(doc.name) + "(" + param_list + "): " + ret + ";";
+					clazz.fields.push(sig);
+					break;
+				}
+			}
+			break;
+		case 1:
+			var doc = $e[2];
+			if(doc.memberof == null) {
+				console.log("INFO: " + Std.string(doc.name) + " is a member with no \"memberof\" field.  This can happen if it is meant to be a module.  Ignoring it for now");
+				return;
+			}
+			var p = require('doctrine').parse(x.comment,{ unwrap : true});
+			var clazz = Publish.makeClazz(doc.memberof,doc);
+			var args = { name : doc.name, clazz : clazz, doc : doc, signature : ""};
+			var type = "Dynamic";
+			var _g1 = 0, _g2 = p.tags;
+			while(_g1 < _g2.length) {
+				var t = _g2[_g1];
+				++_g1;
+				if(t.title == "type") type = Publish.renderType(t.type);
+			}
+			switch(doc.scope) {
+			case "instance":
+				var sig = "" + comment + "\tpublic var " + Std.string(doc.name) + ": " + type + ";";
+				clazz.fields.push(sig);
+				break;
+			case "static":case "global":
+				var sig = "" + comment + "\tpublic static var " + Std.string(doc.name) + ": " + type + ";";
+				clazz.fields.push(sig);
+				break;
+			}
+			break;
+		case 3:
+			var doc = $e[2];
+			var name = doc.name;
+			if(doc.memberof != null && doc.memberof.length > 0) name = doc.memberof + "." + name;
+			var p = require('doctrine').parse(x.comment,{ unwrap : true});
+			var is_constructor = false;
+			var params = [];
+			var ret = "Void";
+			var _g1 = 0, _g2 = p.tags;
+			while(_g1 < _g2.length) {
+				var t = _g2[_g1];
+				++_g1;
+				if(t.title == "constructor" || t.title == "interface") is_constructor = true; else if(t.title == "param") {
+					var optional = "";
+					if(Publish.isOptional(t.type)) optional = "?";
+					params.push("" + optional + Publish.keywordDodge(t.name) + ": " + Publish.renderType(t.type));
+				} else if(t.title == "return") ret = Publish.renderType(t.type);
+			}
+			var clazz = Publish.makeClazz(name,doc);
+			var param_list = params.join(", ");
+			clazz.comment = "" + Std.string(x.name) + " : generated by hxtern";
+			if(x.description != null) clazz.comment += "\n" + x.description;
+			if(is_constructor) {
+				var cls_pack = doc.name;
+				if(doc.memberof != null) cls_pack = doc.memberof + "." + Std.string(doc.name);
+				var sig = "\tpublic function new(" + param_list + ");";
+				var clazz1 = Publish.makeClazz(cls_pack,doc);
+				clazz1.fields.push(sig);
+			}
+			break;
+		case 5:
+			var doc = $e[2];
+			var name = doc.name;
+			if(doc.memberof != null && doc.memberof.length > 0) name = doc.memberof + "." + name;
+			var p = require('doctrine').parse(x.comment,{ unwrap : true});
+			var td = "";
+			var _g1 = 0, _g2 = p.tags;
+			while(_g1 < _g2.length) {
+				var t = _g2[_g1];
+				++_g1;
+				if(t.title == "typedef") td = Publish.renderType(t.type);
+			}
+			if(td == "") td = "{}";
+			var clazz = Publish.makeClazz(name,doc,true);
+			clazz.fields = [td];
+			break;
+		case 7:
+			throw "Unknown doclet type: " + x.kind;
+			break;
+		default:
+			null;
+		}
+	});
+	Publish.ensureDirectory(Publish.dest);
+	Publish.render(Publish.pack_obj,Publish.dest);
+}
+Publish.main = function() {
+	Publish.class_list = [];
+	Publish.pack_obj = { name : "", packs : new haxe.ds.StringMap(), classes : new haxe.ds.StringMap()};
+	Publish.dest = env.opts.destination;
+	var query = env.opts.query;
+	if(query == null || query.global == null) throw "Must pass query parameter of global=<packname> for global class alias";
+	Publish.global_alias = query.global;
+	exports.publish = Publish.publish;
 }
 Publish.isOptional = function(type) {
 	var _g = DoctrineHelper.chooseType(type);
@@ -556,6 +555,10 @@ Publish.lc = function(arg) {
 }
 Publish.uc = function(arg) {
 	return new EReg("^[A-Z]","").match(arg);
+}
+Publish.fixDescription = function(description) {
+	var fixed_description = description.split("\n").join("\n\t  ");
+	return "\t/**\n\t  " + fixed_description + "\n\t */\n";
 }
 Publish.titleCase = function(arg) {
 	return arg.charAt(0).toUpperCase() + arg.substring(1);

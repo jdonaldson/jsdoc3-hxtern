@@ -21,10 +21,8 @@ class Publish {
         taffy.sort("longname, version, since");
         taffy.retrieve().each(function(x,y){
             var comment = '';
-            if (x.description != null && x.description.length > 0) {
-                var fixed_description = x.description.split('\n').join('\n\t  ');
-                comment = '\t/**\n\t  $fixed_description\n\t */\n';
-            }
+            if (x.description != null) comment = fixDescription(x.description);
+
             switch(x.docletType()){
                 case DocletFunction(doc) : {
                     if (doc.memberof == null){
@@ -79,7 +77,7 @@ class Publish {
                                 var sig = '\tpublic function ${doc.name}($param_list): $ret;';
                                 clazz.fields.push(sig);
                             }
-                            case "static"   : {
+                            case "static", "global"   : {
                                 var sig = '\tpublic static function ${doc.name}($param_list): $ret;';
                                 clazz.fields.push(sig);
                             }
@@ -110,7 +108,7 @@ class Publish {
                             var sig = '${comment}\tpublic var ${doc.name}: $type;';
                             clazz.fields.push(sig);
                         }
-                        case "static" : {
+                        case "static", "global" : {
                             var sig = '${comment}\tpublic static var ${doc.name}: $type;';
                             clazz.fields.push(sig);
                         }
@@ -423,6 +421,10 @@ class Publish {
     }
     public static function lc(arg: String) return ~/^[a-z]/.match(arg);
     public static function uc(arg: String) return ~/^[A-Z]/.match(arg);
+    public static function fixDescription(description:String) : String {
+        var fixed_description = description.split('\n').join('\n\t  ');
+        return '\t/**\n\t  $fixed_description\n\t */\n';
+    }
     public static function titleCase(arg: String) : String {
         return arg.charAt(0).toUpperCase() + arg.substring(1);
     }
