@@ -86,9 +86,10 @@ typedef Pack = {
 typedef Clazz = {
     type       : String,
     pack       : Pack,
-    name       : String,
-    is_private : Bool,
     pname      : String,
+    name       : String,
+    signature  : String,
+    is_private : Bool,
     ?native    : String,
     ?fields    : Array<String>,
     ?comment   : String,
