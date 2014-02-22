@@ -84,13 +84,14 @@ typedef Pack = {
 }
 
 typedef Clazz = {
-    type    : String,
-    pack    : Pack,
-    name    : String,
-    pname   : String, 
-    ?native : String,
-    ?fields : Array<String>,
-    ?comment : String,
+    type       : String,
+    pack       : Pack,
+    name       : String,
+    is_private : Bool,
+    pname      : String,
+    ?native    : String,
+    ?fields    : Array<String>,
+    ?comment   : String,
 }
 
 
