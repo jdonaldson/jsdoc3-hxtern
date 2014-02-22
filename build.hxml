@@ -1,5 +1,5 @@
 -cp src
 -main Publish
 -js template/publish.js
--cmd jsdoc -t template ~/Projects/hxtern/ext/closure-compiler/contrib/externs/youtubeplayer.js -q global=youtubeplayer 
+-cmd jsdoc -t template ~/Projects/hxtern/ext/closure-compiler/contrib/externs/facebook_javascript_sdk.js -q global=facebook_javascript_sdk 
 
