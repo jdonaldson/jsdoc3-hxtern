@@ -61,7 +61,7 @@ class Publish {
 
                     if (is_constructor){
                         var cls_pack = classModule(doc.memberof, null,  doc.name);
-                        
+
                         var sig = '\tpublic function new($param_list);';
                         var clazz = makeClazz(cls_pack, doc);
                         clazz.fields.push(sig);
@@ -258,7 +258,7 @@ class Publish {
                 } else if (count > 6){
                     throw "Too many types in union type $type";
                 } else {
-                    return 'hxtern.Any.Any$count<$types>';
+                    return 'Hxtern.Any$count<$types>';
                 }
             }
             case NullableLiteral(type) : return 'Dynamic';
@@ -318,6 +318,11 @@ class Publish {
         switch(name){
             case "Element" : return 'js.html.Element';
         }
+
+        name = ~/^[^a-zA-Z]*/.replace(name,'');
+        if (name == '') name = global_alias;
+        name = titleCase(name);
+
         var pack = [];
         while(parts.length > 0 && lc(parts[0])){
             pack.push(parts.shift());
@@ -406,7 +411,7 @@ class Publish {
             var pcls = packs.pop();
             if (uc(pcls)){
                 while (uc(pcls)){
-                    pname = pcls;
+                    pname = fixType(pcls);
                     pcls = packs.pop();
                 }
             } else {
@@ -415,7 +420,10 @@ class Publish {
         }
         var pack = extractPacks(packs.join('.'));
         var type = is_typedef ? 'typedef' : 'class';
-        var name = titleCase(cls);
+        var name = cls;
+        name = ~/^[^a-zA-Z]*/.replace(name,'');
+        if (name == '') name = global_alias;
+        name = titleCase(name);
         var signature = classModule(pack.name, pname, name);
         var clazz : Clazz = {
             name       : name,

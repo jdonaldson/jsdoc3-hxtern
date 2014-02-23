@@ -106,7 +106,10 @@ var EReg = function(r,opt) {
 };
 EReg.__name__ = true;
 EReg.prototype = {
-	match: function(s) {
+	replace: function(s,by) {
+		return s.replace(this.r,by);
+	}
+	,match: function(s) {
 		if(this.r.global) this.r.lastIndex = 0;
 		this.r.m = this.r.exec(s);
 		this.r.s = s;
@@ -407,7 +410,7 @@ Publish.renderType = function(type) {
 			return $r;
 		}(this))).join(",");
 		var count = type1.elements.length;
-		if(count == 0) throw "No types in uniontype for $type"; else if(count == 1) return Publish.renderType(type1.elements[0]); else if(count > 6) throw "Too many types in union type $type"; else return "hxtern.Any.Any" + count + "<" + types + ">";
+		if(count == 0) throw "No types in uniontype for $type"; else if(count == 1) return Publish.renderType(type1.elements[0]); else if(count > 6) throw "Too many types in union type $type"; else return "Hxtern.Any" + count + "<" + types + ">";
 		break;
 	case 7:
 		var type1 = $e[2];
@@ -501,6 +504,9 @@ Publish.fixType = function(signature) {
 	case "Element":
 		return "js.html.Element";
 	}
+	name = new EReg("^[^a-zA-Z]*","").replace(name,"");
+	if(name == "") name = Publish.global_alias;
+	name = Publish.titleCase(name);
 	var pack = [];
 	while(parts.length > 0 && Publish.lc(parts[0])) pack.push(parts.shift());
 	var pname = "";
@@ -572,13 +578,16 @@ Publish.makeClazz = function(memberof,doclet,is_typedef,is_private) {
 	if(packs.length > 0) {
 		var pcls = packs.pop();
 		if(Publish.uc(pcls)) while(Publish.uc(pcls)) {
-			pname = pcls;
+			pname = Publish.fixType(pcls);
 			pcls = packs.pop();
 		} else packs.push(pcls);
 	}
 	var pack = Publish.extractPacks(packs.join("."));
 	var type = is_typedef?"typedef":"class";
-	var name = Publish.titleCase(cls);
+	var name = cls;
+	name = new EReg("^[^a-zA-Z]*","").replace(name,"");
+	if(name == "") name = Publish.global_alias;
+	name = Publish.titleCase(name);
 	var signature = Publish.classModule(pack.name,pname,name);
 	var clazz = { name : name, type : type, pack : pack, pname : pname, is_private : is_private, 'native' : memberof, signature : signature, fields : []};
 	var cur_clazzes = clazz.pack.classes;
