@@ -1,0 +1,5 @@
+-cp out 
+-cp src/test 
+-cp ../hxtern/src
+-main Test
+-js bin/test.js 
