@@ -4,4 +4,5 @@
 # -cmd jsdoc -t template ~/Projects/hxtern/ext/closure-compiler/contrib/externs/facebook_javascript_sdk.js -q global=facebook_javascript_sdk 
 # -cmd jsdoc -t template ~/Projects/hxtern/ext/closure-compiler/contrib/externs/youtubeplayer.js -q global=youtubeplayer
 # -cmd jsdoc -t template ~/Projects/hxtern/ext/closure-compiler/contrib/externs/w3c_rtc.js -q global=w3c_rtc
--cmd jsdoc -t template ~/Projects/hxtern/ext/closure-compiler/contrib/externs/google_analytics_api.js -q global=google_analytics_api
+# -cmd jsdoc -t template ~/Projects/hxtern/ext/closure-compiler/contrib/externs/google_analytics_api.js -q global=google_analytics_api
+-cmd jsdoc -t template ~/Projects/hxtern/ext/closure-compiler/contrib/externs/jquery-1.5.js -q "global=jquery&ignore=$.deferred,$.Deferred,jQuery.deferred,$.event,jQuery.event"

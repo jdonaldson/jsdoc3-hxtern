@@ -126,6 +126,16 @@ HxOverrides.iter = function(a) {
 		return this.arr[this.cur++];
 	}};
 }
+var Lambda = function() { }
+Lambda.__name__ = true;
+Lambda.has = function(it,elt) {
+	var $it0 = $iterator(it)();
+	while( $it0.hasNext() ) {
+		var x = $it0.next();
+		if(x == elt) return true;
+	}
+	return false;
+}
 var IMap = function() { }
 IMap.__name__ = true;
 var Publish = function() { }
@@ -134,6 +144,7 @@ Publish.publish = function(taffy,opts,tutorial) {
 	taffy.sort("longname, version, since");
 	var taffy_items = taffy();
 	taffy_items.each(function(x,y) {
+		if(Lambda.has(Publish.ignore_list,x.memberof) || Lambda.has(Publish.ignore_list,x.memberof + "." + Std.string(x.name)) || Lambda.has(Publish.ignore_list,x.name)) return;
 		var comment = "";
 		if(x.description != null) comment = Publish.fixDescription(x.description);
 		var _g = DocletHelper.docletType(x);
@@ -294,6 +305,8 @@ Publish.main = function() {
 	var query = env.opts.query;
 	if(query == null || query.global == null) throw "Must pass query parameter of global=<packname> for global class alias";
 	Publish.global_alias = query.global;
+	Publish.ignore_list = [];
+	if(query.ignore != null) Publish.ignore_list = query.ignore.split(",");
 	exports.publish = Publish.publish;
 }
 Publish.isOptional = function(type) {
@@ -493,25 +506,31 @@ Publish.nameExpressionType = function(expression) {
 	case "void":
 		return "Void";
 	default:
+		console.log(expression);
+		console.log(Publish.fixType(expression));
+		console.log("-------");
 		return Publish.fixType(expression);
 	}
+}
+Publish.fixName = function(name) {
+	name = new EReg("^[^a-zA-Z]*","").replace(name,"");
+	return name;
 }
 Publish.fixType = function(signature) {
 	var parts = signature.split(".");
 	var fixed = [];
-	var name = Publish.titleCase(parts.pop());
+	var name = Publish.titleCase(Publish.fixName(parts.pop()));
 	switch(name) {
 	case "Element":
 		return "js.html.Element";
 	}
-	name = new EReg("^[^a-zA-Z]*","").replace(name,"");
-	if(name == "") name = Publish.global_alias;
-	name = Publish.titleCase(name);
 	var pack = [];
-	while(parts.length > 0 && Publish.lc(parts[0])) pack.push(parts.shift());
+	while(parts.length > 0 && Publish.lc(parts[0])) pack.push(Publish.fixName(parts.shift()));
 	var pname = "";
 	if(parts.length > 0) pname = parts[0];
-	return Publish.classModule(pack.join("."),pname,name);
+	var ret = Publish.classModule(pack.join("."),pname,name);
+	if(ret == "") ret = Publish.fixType(Publish.global_alias);
+	return ret;
 }
 Publish.render = function(pack,cwd) {
 	Publish.ensureDirectory(cwd);
@@ -556,6 +575,7 @@ Publish.extractPacks = function(pack) {
 	while(_g < packs.length) {
 		var p = packs[_g];
 		++_g;
+		p = Publish.fixName(p);
 		if(cur_name == "") cur_name = p; else cur_name = [cur_name,p].join(".");
 		if(cur_obj.packs.exists(p)) cur_obj = cur_obj.packs.get(p); else {
 			var new_pack = { name : cur_name, packs : new haxe.ds.StringMap(), classes : new haxe.ds.StringMap()};
@@ -594,7 +614,7 @@ Publish.makeClazz = function(memberof,doclet,is_typedef,is_private) {
 	var full_name = pack.name == null || pack.name == ""?clazz.name:pack.name + "." + clazz.name;
 	if(cur_clazzes.exists(full_name)) {
 		var cur_clazz = cur_clazzes.get(full_name);
-		if(cur_clazz["native"] != clazz["native"]) throw "Two different definitions for " + clazz.name + " : " + Std.string(clazz) + " and " + Std.string(cur_clazz);
+		if(cur_clazz["native"] != clazz["native"]) throw "Two different definitions for " + clazz.name + " : " + clazz["native"] + " and " + cur_clazz["native"];
 		clazz = cur_clazz;
 	} else cur_clazzes.set(full_name,clazz);
 	return clazz;
@@ -780,6 +800,9 @@ js.Boot.__instanceof = function(o,cl) {
 		return o.__enum__ == cl;
 	}
 }
+function $iterator(o) { if( o instanceof Array ) return function() { return HxOverrides.iter(o); }; return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator; };
+var $_, $fid = 0;
+function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; };
 String.prototype.__class__ = String;
 String.__name__ = true;
 Array.prototype.__class__ = Array;

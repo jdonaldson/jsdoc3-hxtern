@@ -12,7 +12,8 @@ typedef Doclet = {
     kind         : String,
     longname     : String,
     ?see         : Array<String>,
-    ?description : String
+    ?description : String,
+    ?memberof : String
 }
 
 /**
@@ -29,7 +30,7 @@ typedef DocletFile = {
  **/
 typedef DocletMemberBase = {
     > Doclet,
-    memberof   : String,
+    // memberof   : String,
     scope      : String, // static, instance, global
     ?access    : String, // private
 }

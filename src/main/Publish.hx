@@ -12,15 +12,22 @@ using Taffy.TaffyHelper;
 using Doclet.DocletHelper;
 using Doctrine.DoctrineHelper;
 
+using Lambda;
+
 class Publish {
     static var pack_obj     : Pack;
     static var class_list   : Array<String>;
     static var global_alias : String;
+    static var ignore_list  : Array<String>;
     static var dest         : String;
     static function publish(taffy: Taffy, opts: PublishOpts, tutorial : Dynamic){
         taffy.sort("longname, version, since");
         var taffy_items = taffy.retrieve();
         taffy_items.each(function(x,y){
+            if (ignore_list.has(x.memberof) || ignore_list.has(x.memberof + '.' + x.name) || ignore_list.has(x.name)) {
+                // trace('ignored ' + x.memberof + '.' + x.name);
+                return;
+            }
             var comment = '';
             if (x.description != null) comment = fixDescription(x.description);
             switch(x.docletType()){
@@ -192,6 +199,9 @@ class Publish {
             throw "Must pass query parameter of global=<packname> for global class alias";
         }
         global_alias = query.global;
+        ignore_list = [];
+        if (query.ignore != null) ignore_list = query.ignore.split(",");
+
         Exports.publish = publish;
     }
     public static function isOptional(type : UnknownType) : Bool {
@@ -310,28 +320,30 @@ class Publish {
             }
         }
     }
+    public static function fixName(name:String){
+        name = ~/^[^a-zA-Z]*/.replace(name,'');
+        return name;
+    }
 
     public static function fixType(signature:String){
         var parts = signature.split('.');
         var fixed = [];
-        var name = titleCase(parts.pop());
+        var name = titleCase(fixName(parts.pop()));
         switch(name){
             case "Element" : return 'js.html.Element';
         }
 
-        name = ~/^[^a-zA-Z]*/.replace(name,'');
-        if (name == '') name = global_alias;
-        name = titleCase(name);
-
         var pack = [];
         while(parts.length > 0 && lc(parts[0])){
-            pack.push(parts.shift());
+            pack.push(fixName(parts.shift()));
         }
         var pname = '';
         if (parts.length > 0){
             pname = parts[0];
         }
-        return classModule(pack.join('.'), pname, name);
+        var ret = classModule(pack.join('.'), pname, name);
+        if (ret == '') ret = fixType(global_alias);
+        return ret; 
     }
 
     public static function render(pack : Pack, cwd : String){
@@ -380,6 +392,7 @@ class Publish {
         var cur_obj = pack_obj;
         var cur_name = '';
         for (p in packs){
+            p = fixName(p);
             cur_name == '' ? cur_name = p : cur_name = [cur_name, p].join('.');
             if (cur_obj.packs.exists(p)) cur_obj = cur_obj.packs.get(p);
             else {
@@ -441,7 +454,7 @@ class Publish {
         if (cur_clazzes.exists(full_name)){
             var cur_clazz = cur_clazzes.get(full_name);
             if (cur_clazz.native != clazz.native){
-                throw ('Two different definitions for ${clazz.name} : $clazz and $cur_clazz');
+                throw ('Two different definitions for ${clazz.name} : ${clazz.native} and ${cur_clazz.native}');
             }
             clazz = cur_clazz;
         } else {
