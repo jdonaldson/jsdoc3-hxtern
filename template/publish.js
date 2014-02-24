@@ -518,7 +518,7 @@ Publish.fixType = function(signature) {
 	var fixed = [];
 	var name = Publish.titleCase(Publish.fixName(parts.pop()));
 	switch(name) {
-	case "Element":case "XMLHttpRequest":
+	case "Element":case "XMLHttpRequest":case "Document":
 		return "js.html." + name;
 	}
 	var pack = [];

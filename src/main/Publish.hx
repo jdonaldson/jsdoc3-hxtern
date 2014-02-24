@@ -330,7 +330,7 @@ class Publish {
         var fixed = [];
         var name = titleCase(fixName(parts.pop()));
         switch(name){
-            case "Element", "XMLHttpRequest" : return 'js.html.$name';
+            case "Element", "XMLHttpRequest", "Document" : return 'js.html.$name';
         }
 
         var pack = [];
