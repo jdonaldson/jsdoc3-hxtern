@@ -301,6 +301,9 @@ class Publish {
                 var resttype = renderType(type.expression);
                 return [for (i in 0...6) '?$resttype'].join('->');
             }
+            case NullLiteral(type) : {
+                return '?Dynamic';
+            }
             case _ : throw 'unknown type in renderType: $type';
         }
         return '';
@@ -493,6 +496,7 @@ class Publish {
                 ret_lines.push(line);
             } else if (tagfound){
                 var stripped = ~/^\s*\*\s*/.replace(line, '');
+                stripped = ~/Read only\./.replace(stripped, '');
                 ret_lines[ret_lines.length-1] += stripped;
             } else {
                 ret_lines.push(line);

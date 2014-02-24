@@ -484,6 +484,9 @@ Publish.renderType = function(type) {
 			$r = _g1;
 			return $r;
 		}(this))).join("->");
+	case 6:
+		var type1 = $e[2];
+		return "?Dynamic";
 	default:
 		throw "unknown type in renderType: " + Std.string(type);
 	}
@@ -648,6 +651,7 @@ Publish.fixDoctrine = function(arg) {
 			ret_lines.push(line);
 		} else if(tagfound) {
 			var stripped = new EReg("^\\s*\\*\\s*","").replace(line,"");
+			stripped = new EReg("Read only\\.","").replace(stripped,"");
 			ret_lines[ret_lines.length - 1] += stripped;
 		} else ret_lines.push(line);
 	}
