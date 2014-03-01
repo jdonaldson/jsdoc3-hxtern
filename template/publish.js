@@ -42,6 +42,28 @@ DocletHelper.docletType = function(doc) {
 		return $r;
 	}(this));
 }
+var Doctrine = function() { }
+Doctrine.__name__ = true;
+Doctrine.parse = function(comment,options) {
+	return require('doctrine').parse(Doctrine.fix(comment));
+}
+Doctrine.fix = function(arg) {
+	var lines = arg.split("\n");
+	var ret_lines = [];
+	var tagfound = false;
+	while(lines.length > 0) {
+		var line = lines.shift();
+		if(new EReg("^\\s\\*\\s*@","").match(line)) {
+			tagfound = true;
+			ret_lines.push(line);
+		} else if(tagfound) {
+			var stripped = new EReg("^\\s*\\*\\s*","").replace(line,"");
+			stripped = new EReg("Read only\\.","").replace(stripped,"");
+			ret_lines[ret_lines.length - 1] += stripped;
+		} else ret_lines.push(line);
+	}
+	return ret_lines.join("\n");
+}
 var DoctrineHelper = function() { }
 DoctrineHelper.__name__ = true;
 DoctrineHelper.chooseType = function(type) {
@@ -152,7 +174,7 @@ Publish.publish = function(taffy,opts,tutorial) {
 		switch( $e[1] ) {
 		case 2:
 			var doc = $e[2];
-			var p = require('doctrine').parse(Publish.fixDoctrine(x.comment),{ unwrap : true});
+			var p = Doctrine.parse(x.comment,{ unwrap : true});
 			var params = [];
 			var ret = "Void";
 			var is_constructor = false;
@@ -185,7 +207,7 @@ Publish.publish = function(taffy,opts,tutorial) {
 			var param_list = params.join(", ");
 			if(is_constructor) {
 				var cls_pack = Publish.classModule(doc.memberof,null,doc.name);
-				var sig = "\tpublic function new(" + param_list + ");";
+				var sig = "\tpublic function new(" + param_list + ") {}";
 				var clazz = Publish.makeClazz(cls_pack,doc);
 				clazz.fields.push(sig);
 			} else {
@@ -209,7 +231,7 @@ Publish.publish = function(taffy,opts,tutorial) {
 				console.log("INFO: " + Std.string(doc.name) + " is a member with no \"memberof\" field.  This can happen if it is meant to be a module.  Ignoring it for now");
 				return;
 			}
-			var p = require('doctrine').parse(Publish.fixDoctrine(x.comment),{ unwrap : true});
+			var p = Doctrine.parse(x.comment,{ unwrap : true});
 			var clazz = Publish.makeClazz(doc.memberof,doc);
 			var args = { name : doc.name, clazz : clazz, doc : doc, signature : ""};
 			var type = "Dynamic";
@@ -234,7 +256,7 @@ Publish.publish = function(taffy,opts,tutorial) {
 			var doc = $e[2];
 			var name = doc.name;
 			if(doc.memberof != null && doc.memberof.length > 0) name = doc.memberof + "." + name;
-			var p = require('doctrine').parse(Publish.fixDoctrine(x.comment),{ unwrap : true});
+			var p = Doctrine.parse(x.comment,{ unwrap : true});
 			var is_constructor = false;
 			var params = [];
 			var ret = "Void";
@@ -276,7 +298,7 @@ Publish.publish = function(taffy,opts,tutorial) {
 			var doc = $e[2];
 			var name = doc.name;
 			if(doc.memberof != null && doc.memberof.length > 0) name = doc.memberof + "." + name;
-			var p = require('doctrine').parse(Publish.fixDoctrine(x.comment),{ unwrap : true});
+			var p = Doctrine.parse(x.comment,{ unwrap : true});
 			var td = "";
 			var _g1 = 0, _g2 = p.tags;
 			while(_g1 < _g2.length) {
@@ -639,23 +661,6 @@ Publish.titleCase = function(arg) {
 }
 Publish.pack2file = function(arg) {
 	return arg.split(".").join(require('path').sep) + ".hx";
-}
-Publish.fixDoctrine = function(arg) {
-	var lines = arg.split("\n");
-	var ret_lines = [];
-	var tagfound = false;
-	while(lines.length > 0) {
-		var line = lines.shift();
-		if(new EReg("^\\s\\*\\s*@","").match(line)) {
-			tagfound = true;
-			ret_lines.push(line);
-		} else if(tagfound) {
-			var stripped = new EReg("^\\s*\\*\\s*","").replace(line,"");
-			stripped = new EReg("Read only\\.","").replace(stripped,"");
-			ret_lines[ret_lines.length - 1] += stripped;
-		} else ret_lines.push(line);
-	}
-	return ret_lines.join("\n");
 }
 Publish.ensureDirectory = function(path) {
 	if(!require('fs').existsSync(path)) {

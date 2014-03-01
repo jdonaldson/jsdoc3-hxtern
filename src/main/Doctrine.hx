@@ -1,9 +1,44 @@
 
+
 /**
-  Minimal doctrine commands to get me started
+  A wrapper class for the normal Doctrine methods.  Pre-processes
+  doctrine comments to prevent certain avoidable errors.
+ **/
+class Doctrine {
+    public static function parse(comment : String, ?options : ParseOptions) {
+        return DoctrineLib.parse(fix(comment));
+    }
+    /**
+      This method just removes any extra lines from @ tag statements.
+     **/
+    static function fix(arg:String){
+        var lines = arg.split('\n');
+        var ret_lines = [];
+        var tagfound = false;
+        while(lines.length > 0){
+            var line = lines.shift();
+            if (~/^\s\*\s*@/.match(line)){
+                tagfound = true;
+                ret_lines.push(line);
+            } else if (tagfound){
+                var stripped = ~/^\s*\*\s*/.replace(line, '');
+                stripped = ~/Read only\./.replace(stripped, '');
+                ret_lines[ret_lines.length-1] += stripped;
+            } else {
+                ret_lines.push(line);
+            }
+        }
+
+        return ret_lines.join('\n');
+    }
+}
+
+/**
+  Minimal doctrine commands to get me started.  This is the class that 
+  actually externs the lib.
  **/
 @:native("require('doctrine')")
-extern class Doctrine {
+extern class DoctrineLib {
     public static function parse(comment : String, ?options : ParseOptions) : DocStructure;
 }
 
@@ -92,6 +127,9 @@ typedef UndefinedLiteral = UnionType
 typedef NullableType = NonNullableType
 
 
+/**
+  A class for autoconstructing enums from unknown types
+ **/
 class DoctrineHelper {
     public static function chooseType(type : UnknownType) : DoctrineType {
         switch(type.type){
@@ -116,22 +154,6 @@ class DoctrineHelper {
     }
 }
 
-            // NullableLiteral: 'NullableLiteral',
-            // AllLiteral: 'AllLiteral',
-            // NullLiteral: 'NullLiteral',
-            // UndefinedLiteral: 'UndefinedLiteral',
-            // VoidLiteral: 'VoidLiteral',
-            // UnionType: 'UnionType',
-            // RecordType: 'RecordType',
-            // FieldType: 'FieldType',
-            // FunctionType: 'FunctionType',
-            // ParameterType: 'ParameterType',
-            // RestType: 'RestType',
-            // NonNullableType: 'NonNullableType',
-            // OptionalType: 'OptionalType',
-            // NullableType: 'NullableType',
-            // NameExpression: 'NameExpression',
-            // TypeApplication: 'TypeApplication'
 
 enum DoctrineType {
     ArrayType        ( type : ArrayType);
@@ -152,3 +174,22 @@ enum DoctrineType {
     VoidLiteral      ( type : VoidLiteral);
     RestType         ( type : RestType);
 }
+
+/* unimplemented */
+
+// NullableLiteral: 'NullableLiteral',
+// AllLiteral: 'AllLiteral',
+// NullLiteral: 'NullLiteral',
+// UndefinedLiteral: 'UndefinedLiteral',
+// VoidLiteral: 'VoidLiteral',
+// UnionType: 'UnionType',
+// RecordType: 'RecordType',
+// FieldType: 'FieldType',
+// FunctionType: 'FunctionType',
+// ParameterType: 'ParameterType',
+// RestType: 'RestType',
+// NonNullableType: 'NonNullableType',
+// OptionalType: 'OptionalType',
+// NullableType: 'NullableType',
+// NameExpression: 'NameExpression',
+// TypeApplication: 'TypeApplication'

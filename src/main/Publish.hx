@@ -31,7 +31,7 @@ class Publish {
             if (x.description != null) comment = fixDescription(x.description);
             switch(x.docletType()){
                 case DocletFunction(doc) : {
-                    var p = Doctrine.parse(fixDoctrine(x.comment), {unwrap: true});
+                    var p = Doctrine.parse(x.comment, {unwrap: true});
                     var params = [];
                     var ret = 'Void';
                     var is_constructor = false;
@@ -68,7 +68,7 @@ class Publish {
                     if (is_constructor){
                         var cls_pack = classModule(doc.memberof, null,  doc.name);
 
-                        var sig = '\tpublic function new($param_list);';
+                        var sig = '\tpublic function new($param_list) {}';
                         var clazz = makeClazz(cls_pack, doc);
                         clazz.fields.push(sig);
                     } else {
@@ -98,7 +98,7 @@ class Publish {
                         trace('INFO: ${doc.name} is a member with no "memberof" field.  This can happen if it is meant to be a module.  Ignoring it for now');
                         return;
                     }
-                    var p = Doctrine.parse(fixDoctrine(x.comment), {unwrap:true});
+                    var p = Doctrine.parse(x.comment, {unwrap:true});
                     var clazz = makeClazz(doc.memberof, doc);
                     var args = {
                         name : doc.name,
@@ -128,7 +128,7 @@ class Publish {
                     if (doc.memberof != null && doc.memberof.length > 0){
                         name = doc.memberof + '.' + name;
                     }
-                    var p = Doctrine.parse(fixDoctrine(x.comment), {unwrap: true});
+                    var p = Doctrine.parse(x.comment, {unwrap: true});
                     var is_constructor = false;
                     var params = [];
                     var ret = 'Void';
@@ -163,7 +163,7 @@ class Publish {
                     if (doc.memberof != null && doc.memberof.length > 0){
                         name = doc.memberof + '.' + name;
                     }
-                    var p = Doctrine.parse(fixDoctrine(x.comment), {unwrap:true});
+                    var p = Doctrine.parse(x.comment, {unwrap:true});
                     var td = '';
                     for (t in p.tags){
                         if (t.title == 'typedef'){
@@ -257,7 +257,6 @@ class Publish {
             case VoidLiteral(type) : return 'Void';
             case AllLiteral(type)  : return 'Dynamic';
             case UnionType(type)   : {
-                // return renderType(type.elements[0]);
                 var types = [for (e in type.elements) renderType(e)].join(',');
                 var count = type.elements.length;
                 if (count == 0){
@@ -483,26 +482,6 @@ class Publish {
     }
     static function pack2file(arg: String) {
         return arg.split('.').join(Path.sep) + '.hx';
-    }
-    static function fixDoctrine(arg:String){
-        var lines = arg.split('\n');
-        var ret_lines = [];
-        var tagfound = false;
-        while(lines.length > 0){
-            var line = lines.shift();
-            if (~/^\s\*\s*@/.match(line)){
-                tagfound = true;
-                ret_lines.push(line);
-            } else if (tagfound){
-                var stripped = ~/^\s*\*\s*/.replace(line, '');
-                stripped = ~/Read only\./.replace(stripped, '');
-                ret_lines[ret_lines.length-1] += stripped;
-            } else {
-                ret_lines.push(line);
-            }
-        }
-
-        return ret_lines.join('\n');
     }
     static function ensureDirectory(path : String){
         if(!Fs.existsSync(path)){
