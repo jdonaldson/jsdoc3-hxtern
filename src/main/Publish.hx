@@ -25,7 +25,6 @@ class Publish {
         var taffy_items = taffy.retrieve();
         taffy_items.each(function(x,y){
             if (ignore_list.has(x.memberof) || ignore_list.has(x.memberof + '.' + x.name) || ignore_list.has(x.name)) {
-                // trace('ignored ' + x.memberof + '.' + x.name);
                 return;
             }
             var comment = '';
