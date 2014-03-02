@@ -31,7 +31,7 @@ class Publish {
             if (x.description != null) comment = fixDescription(x.description);
             switch(x.docletType()){
                 case DocletFunction(doc) : {
-                    var p = Doctrine.parse(x.comment, {unwrap: true});
+                    var p = Doctrine.parse(x.comment);
                     var params = [];
                     var ret = 'Void';
                     var is_constructor = false;
@@ -128,7 +128,7 @@ class Publish {
                     if (doc.memberof != null && doc.memberof.length > 0){
                         name = doc.memberof + '.' + name;
                     }
-                    var p = Doctrine.parse(x.comment, {unwrap: true});
+                    var p = Doctrine.parse(x.comment);
                     var is_constructor = false;
                     var params = [];
                     var ret = 'Void';
@@ -163,7 +163,7 @@ class Publish {
                     if (doc.memberof != null && doc.memberof.length > 0){
                         name = doc.memberof + '.' + name;
                     }
-                    var p = Doctrine.parse(x.comment, {unwrap:true});
+                    var p = Doctrine.parse(x.comment);
                     var td = '';
                     for (t in p.tags){
                         if (t.title == 'typedef'){

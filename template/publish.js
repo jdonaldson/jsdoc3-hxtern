@@ -45,7 +45,8 @@ DocletHelper.docletType = function(doc) {
 var Doctrine = function() { }
 Doctrine.__name__ = true;
 Doctrine.parse = function(comment,options) {
-	return require('doctrine').parse(Doctrine.fix(comment));
+	if(options == null) options = { unwrap : true};
+	return require('doctrine').parse(Doctrine.fix(comment),options);
 }
 Doctrine.fix = function(arg) {
 	var lines = arg.split("\n");
@@ -56,7 +57,7 @@ Doctrine.fix = function(arg) {
 		if(new EReg("^\\s\\*\\s*@","").match(line)) {
 			tagfound = true;
 			ret_lines.push(line);
-		} else if(tagfound) {
+		} else if(tagfound && !new EReg("^\\s*\\*/","").match(line)) {
 			var stripped = new EReg("^\\s*\\*\\s*","").replace(line,"");
 			stripped = new EReg("Read only\\.","").replace(stripped,"");
 			ret_lines[ret_lines.length - 1] += stripped;
@@ -174,7 +175,7 @@ Publish.publish = function(taffy,opts,tutorial) {
 		switch( $e[1] ) {
 		case 2:
 			var doc = $e[2];
-			var p = Doctrine.parse(x.comment,{ unwrap : true});
+			var p = Doctrine.parse(x.comment);
 			var params = [];
 			var ret = "Void";
 			var is_constructor = false;
@@ -256,7 +257,7 @@ Publish.publish = function(taffy,opts,tutorial) {
 			var doc = $e[2];
 			var name = doc.name;
 			if(doc.memberof != null && doc.memberof.length > 0) name = doc.memberof + "." + name;
-			var p = Doctrine.parse(x.comment,{ unwrap : true});
+			var p = Doctrine.parse(x.comment);
 			var is_constructor = false;
 			var params = [];
 			var ret = "Void";
@@ -298,7 +299,7 @@ Publish.publish = function(taffy,opts,tutorial) {
 			var doc = $e[2];
 			var name = doc.name;
 			if(doc.memberof != null && doc.memberof.length > 0) name = doc.memberof + "." + name;
-			var p = Doctrine.parse(x.comment,{ unwrap : true});
+			var p = Doctrine.parse(x.comment);
 			var td = "";
 			var _g1 = 0, _g2 = p.tags;
 			while(_g1 < _g2.length) {

@@ -6,7 +6,8 @@
  **/
 class Doctrine {
     public static function parse(comment : String, ?options : ParseOptions) {
-        return DoctrineLib.parse(fix(comment));
+        if (options == null) options = {unwrap:true};
+        return DoctrineLib.parse(fix(comment), options);
     }
     /**
       This method just removes any extra lines from @ tag statements.
@@ -17,10 +18,13 @@ class Doctrine {
         var tagfound = false;
         while(lines.length > 0){
             var line = lines.shift();
+
+
+            // join multi-line tag declarations
             if (~/^\s\*\s*@/.match(line)){
                 tagfound = true;
                 ret_lines.push(line);
-            } else if (tagfound){
+            } else if (tagfound && !~/^\s*\*\//.match(line)){
                 var stripped = ~/^\s*\*\s*/.replace(line, '');
                 stripped = ~/Read only\./.replace(stripped, '');
                 ret_lines[ret_lines.length-1] += stripped;
