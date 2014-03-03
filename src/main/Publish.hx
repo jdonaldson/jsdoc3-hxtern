@@ -380,14 +380,17 @@ class Publish {
             if (clazz.extend != null){
                 extends_phrase = 'extends ${clazz.extend} ';
             }
-            if (extends_phrase != ''){
-                clazz.fields = clazz.fields.filter(function(x) return ~/function new\b/.match(x));
-            }
             var content = clazz.fields.join('\n\n');
+
+            clazz.type = switch(clazz.type){
+                case 'function', 'member' : 'class';
+                default : clazz.type;
+            };
+
             switch(clazz.type){
                 // class and interface are "natural" classes.
                 // function and member types happen when we need to create a virtual class.
-                case 'class', 'interface', 'function', 'member': {
+                case 'class', 'interface': {
                     content = '/**\n${clazz.comment}\n*/\n$package_line\n$native\nextern ${clazz.type} ${clazz.name} ${extends_phrase}{\n$content\n}\n'; }
                 case 'typedef' : {
                     content = '/**\n${clazz.comment}\n*/\n$package_line\n$native\nextern ${clazz.type} ${clazz.name} = $content\n\n';
