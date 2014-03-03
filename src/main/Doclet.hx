@@ -87,6 +87,8 @@ typedef Pack = {
 typedef Clazz = {
     type       : String,
     pack       : Pack,
+    ?inherits   : String,
+    ?impl       : String,
     pname      : String,
     name       : String,
     signature  : String,
