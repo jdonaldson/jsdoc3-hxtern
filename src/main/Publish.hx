@@ -35,25 +35,28 @@ class Publish {
                     var params = [];
                     var ret = 'Void';
                     var is_constructor = false;
+                    var overridden = false;
                     for (t in p.tags){
-                        if (t.title == 'constructor' || t.title == 'interface'){
-                            is_constructor = true;
-                        } else if (t.title == 'param'){
-                            switch(t.type.chooseType()){
-                                case RestType(type) : {
-                                    for (i in 0...6){
-                                        params.push('?_opt$i: ${renderType(type.expression)}');
+                        switch(t.title){
+                            case "override" : overridden = true;
+                            case "constructor", "interface" : {
+                                is_constructor = true;
+                            }
+                            case "param" : {
+                                switch(t.type.chooseType()){
+                                    case RestType(type) : {
+                                        for (i in 0...6){
+                                            params.push('?_opt$i: ${renderType(type.expression)}');
+                                        }
+                                    }
+                                    default : {
+                                        var optional = '';
+                                        if (isOptional(t.type)) optional = '?';
+                                        params.push('$optional${keywordDodge(t.name)}: ${renderType(t.type)}');
                                     }
                                 }
-                                default : {
-                                    var optional = '';
-                                    if (isOptional(t.type)) optional = '?';
-                                    params.push('$optional${keywordDodge(t.name)}: ${renderType(t.type)}');
-                                }
                             }
-
-                        } else if (t.title == 'return'){
-                            ret = renderType(t.type);
+                            case "return" : ret = renderType(t.type);
                         }
                     }
                     if (!is_constructor){
@@ -64,31 +67,32 @@ class Publish {
                         }
                     }
                     var param_list = params.join(', ');
+                    if (!overridden){
+                        if (is_constructor){
+                            var cls_pack = classModule(doc.memberof, null,  doc.name);
 
-                    if (is_constructor){
-                        var cls_pack = classModule(doc.memberof, null,  doc.name);
+                            var sig = '\tpublic function new($param_list) {}';
+                            var clazz = makeClazz(cls_pack, doc);
+                            clazz.fields.push(sig);
+                        } else {
+                            var clazz = makeClazz(doc.memberof, doc);
 
-                        var sig = '\tpublic function new($param_list) {}';
-                        var clazz = makeClazz(cls_pack, doc);
-                        clazz.fields.push(sig);
-                    } else {
-                        var clazz = makeClazz(doc.memberof, doc);
+                            var args = {
+                                name      : doc.name,
+                                clazz     : clazz,
+                                doc       : doc,
+                                signature : ''
+                            };
 
-                        var args = {
-                            name      : doc.name,
-                            clazz     : clazz,
-                            doc       : doc,
-                            signature : ''
-                        };
-
-                        switch(doc.scope){
-                            case "instance" : {
-                                var sig = '\tpublic function ${doc.name}($param_list): $ret {}';
-                                clazz.fields.push(sig);
-                            }
-                            case "static", "global"   : {
-                                var sig = '\tpublic static function ${doc.name}($param_list): $ret {}';
-                                clazz.fields.push(sig);
+                            switch(doc.scope){
+                                case "instance" : {
+                                    var sig = '\tpublic function ${doc.name}($param_list): $ret {}';
+                                    clazz.fields.push(sig);
+                                }
+                                case "static", "global"   : {
+                                    var sig = '\tpublic static function ${doc.name}($param_list): $ret {}';
+                                    clazz.fields.push(sig);
+                                }
                             }
                         }
                     }
@@ -107,19 +111,23 @@ class Publish {
                         signature : ''
                     }
                     var type = 'Dynamic';
+                    var overridden = false;
                     for (t in p.tags){
-                        if (t.title == 'type') {
-                            type = renderType(t.type);
+                        switch(t.title){
+                            case "type" : type = renderType(t.type);
+                            case "override" : overridden = true;
                         }
                     }
-                    switch(doc.scope){
-                        case "instance" : {
-                            var sig = '${comment}\tpublic var ${doc.name}: $type;';
-                            clazz.fields.push(sig);
-                        }
-                        case "static", "global" : {
-                            var sig = '${comment}\tpublic static var ${doc.name}: $type;';
-                            clazz.fields.push(sig);
+                    if (!overridden){
+                        switch(doc.scope){
+                            case "instance" : {
+                                var sig = '${comment}\tpublic var ${doc.name}: $type;';
+                                clazz.fields.push(sig);
+                            }
+                            case "static", "global" : {
+                                var sig = '${comment}\tpublic static var ${doc.name}: $type;';
+                                clazz.fields.push(sig);
+                            }
                         }
                     }
                 }
